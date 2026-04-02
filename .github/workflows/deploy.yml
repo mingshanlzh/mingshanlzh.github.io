@@ -26,11 +26,14 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: shan-website/package-lock.json
 
       - name: Install dependencies
+        working-directory: shan-website
         run: npm ci
 
       - name: Build (static export)
+        working-directory: shan-website
         run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
@@ -39,7 +42,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: ./shan-website/out
 
   deploy:
     environment:
