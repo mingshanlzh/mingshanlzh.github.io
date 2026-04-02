@@ -1,11 +1,11 @@
 {
   "name": "Shan Jiang",
   "pronouns": "he/him",
-  "title": "PhD Candidate",
+  "title": "PhD",
   "institution": "Macquarie University Centre for Health Economy (MUCHE)",
   "location": "Sydney, Australia",
   "photo": "/images/profile.jpg",
-  "bio": "Shan Jiang is a PhD candidate at the Macquarie University Centre for Health Economy (MUCHE). His research focuses on equity-informative economic evaluation, particularly distributional cost-effectiveness analysis (DCEA), methodological development in economic evaluation, and advanced health economic modelling. He also works on equity-informative economic valuations in global health.",
+  "bio": "Shan Jiang is a PhD student at the Macquarie University Centre for Health Economy (MUCHE). His research focuses on equity-informative economic evaluation, particularly distributional cost-effectiveness analysis (DCEA), methodological development in economic evaluation, and advanced health economic modelling. He also works on equity-informative economic valuations in global health.",
   "researchStatement": "My research focuses on equity-informative economic evaluation — particularly distributional cost-effectiveness analysis (DCEA) — and advanced health economic modelling. I am committed to building methods that make economic evaluations more informative about who gains and who loses from health policies, and to applying these methods in global health contexts where equity considerations are most critical.",
   "links": {
     "scholar": "https://scholar.google.com/citations?user=TeSuUycAAAAJ&hl=en",
@@ -16,7 +16,7 @@
     "email": "shan.jiang@mq.edu.au"
   },
   "stats": {
-    "publications": 12,
+    "publications": 42,
     "workingProjects": 6,
     "activeGrants": 2,
     "studentsSupervised": 4
