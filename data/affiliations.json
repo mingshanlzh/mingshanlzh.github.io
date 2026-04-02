@@ -1,0 +1,14 @@
+[
+  {
+    "id": "aff1",
+    "role": "PhD Candidate",
+    "institution": "Macquarie University Centre for Health Economy (MUCHE)",
+    "link": "https://www.mq.edu.au/research/research-centres-groups-and-facilities/health-and-medicine/centres/centre-for-health-economy"
+  },
+  {
+    "id": "aff2",
+    "role": "Affiliated Researcher",
+    "institution": "Centre for Health Economics Research and Evaluation (CHERE), UTS",
+    "link": "https://chere.uts.edu.au"
+  }
+]

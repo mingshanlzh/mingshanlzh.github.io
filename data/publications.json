@@ -1,0 +1,47 @@
+[
+  {
+    "id": "pub1",
+    "title": "Distributional Cost-Effectiveness Analysis: A Methodological Review",
+    "authors": "Jiang S, Menzies NA, Morton A",
+    "journal": "Health Economics",
+    "year": 2024,
+    "volume": "",
+    "pages": "",
+    "doi": "",
+    "url": "",
+    "pdf": "",
+    "tags": ["DCEA", "methodology", "equity"],
+    "featured": true,
+    "type": "journal"
+  },
+  {
+    "id": "pub2",
+    "title": "Equity-Weighted Cost-Effectiveness Analysis of Genomic Screening Programs",
+    "authors": "Jiang S, Haas M, Viney R",
+    "journal": "Value in Health",
+    "year": 2024,
+    "volume": "",
+    "pages": "",
+    "doi": "",
+    "url": "",
+    "pdf": "",
+    "tags": ["DCEA", "genomics", "screening", "Australia"],
+    "featured": true,
+    "type": "journal"
+  },
+  {
+    "id": "pub3",
+    "title": "Advanced Health Economic Modelling in Global Health: A Scoping Review",
+    "authors": "Jiang S, Morton A",
+    "journal": "Global Health: Science and Practice",
+    "year": 2023,
+    "volume": "",
+    "pages": "",
+    "doi": "",
+    "url": "",
+    "pdf": "",
+    "tags": ["global health", "modelling", "scoping review"],
+    "featured": false,
+    "type": "journal"
+  }
+]

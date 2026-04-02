@@ -1,0 +1,23 @@
+[
+  {
+    "id": "svc1",
+    "role": "Convenor, Health Equity Special Interest Group",
+    "organisation": "Australian Health Economics Society (AHES)",
+    "period": "2023–present",
+    "link": "https://ahes.net.au"
+  },
+  {
+    "id": "svc2",
+    "role": "Secretary, Health Preference Research SIG",
+    "organisation": "International Society for Pharmacoeconomics and Outcomes Research (ISPOR)",
+    "period": "2023–present",
+    "link": "https://ispor.org"
+  },
+  {
+    "id": "svc3",
+    "role": "Peer Reviewer",
+    "organisation": "Health Economics, Value in Health, PharmacoEconomics",
+    "period": "2022–present",
+    "link": ""
+  }
+]

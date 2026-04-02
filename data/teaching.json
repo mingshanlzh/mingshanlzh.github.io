@@ -1,0 +1,22 @@
+[
+  {
+    "id": "course1",
+    "title": "Health Economic Evaluation",
+    "institution": "Macquarie University",
+    "level": "Postgraduate",
+    "period": "2023",
+    "role": "Guest Lecturer",
+    "slides": "",
+    "description": "Lecture on distributional cost-effectiveness analysis and equity in economic evaluation."
+  },
+  {
+    "id": "course2",
+    "title": "Introduction to DCEA (Short Course)",
+    "institution": "ISPOR Asia Pacific",
+    "level": "Professional",
+    "period": "2023",
+    "role": "Instructor",
+    "slides": "",
+    "description": "Half-day short course on distributional cost-effectiveness analysis methods and software."
+  }
+]

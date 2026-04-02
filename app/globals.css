@@ -1,0 +1,171 @@
+@import "tailwindcss";
+
+/* ─── Shan Jiang Academic Website — Design System ─────────────────────────── */
+:root {
+  /* Surface colours */
+  --bg-primary:    #F7FAFC;   /* page background — off-white */
+  --bg-card:       #FFFFFF;   /* card / panel */
+  --bg-sidebar:    #1A2535;   /* dark sidebar */
+  --bg-sidebar-hover: #243044;
+
+  /* Text colours */
+  --text-body:     #2F3A45;   /* body copy */
+  --text-heading:  #3F5F73;   /* headings */
+  --text-muted:    #6B7A8A;   /* secondary text */
+  --text-on-dark:  #E8F0F5;   /* text on dark sidebar */
+  --text-on-dark-muted: #8BA5BC;
+
+  /* Accent colours */
+  --accent:        #5F8FA8;   /* primary accent — steel blue */
+  --accent-hover:  #4A7A93;
+  --accent-soft:   #A8C8C0;   /* secondary accent — sage teal */
+  --accent-bg:     #EBF4F8;   /* tinted background for tags/badges */
+
+  /* Borders & shadows */
+  --border:        #DDE6EE;
+  --border-soft:   #EEF3F7;
+  --shadow-sm:     0 1px 3px rgba(47,58,69,0.08);
+  --shadow-md:     0 4px 12px rgba(47,58,69,0.10);
+  --shadow-lg:     0 8px 24px rgba(47,58,69,0.12);
+
+  /* Sidebar width */
+  --sidebar-w:     260px;
+}
+
+@theme inline {
+  --color-background: var(--bg-primary);
+  --color-foreground: var(--text-body);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* ─── Base reset ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-body);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Typography ─────────────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-heading);
+  font-weight: 600;
+  line-height: 1.25;
+}
+h1 { font-size: 2rem; }
+h2 { font-size: 1.5rem; }
+h3 { font-size: 1.2rem; }
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+a:hover { color: var(--accent-hover); text-decoration: underline; }
+
+/* ─── Layout helpers ─────────────────────────────────────────────────────── */
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  padding: 2.5rem 3rem;
+  max-width: 900px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+/* ─── Card component ─────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s;
+}
+.card:hover { box-shadow: var(--shadow-md); }
+
+/* ─── Tag / badge ────────────────────────────────────────────────────────── */
+.tag {
+  display: inline-block;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.55rem;
+  border-radius: 4px;
+}
+
+/* ─── Section heading with accent underline ──────────────────────────────── */
+.section-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent-soft);
+  margin-bottom: 1.5rem;
+}
+
+/* ─── Progress bar (for project tracking) ───────────────────────────────── */
+.progress-track {
+  background: var(--border);
+  border-radius: 99px;
+  height: 6px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-soft), var(--accent));
+  border-radius: 99px;
+  transition: width 0.5s ease;
+}
+
+/* ─── Button ─────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: 7px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+.btn-primary {
+  background: var(--accent);
+  color: white;
+}
+.btn-primary:hover { background: var(--accent-hover); color: white; text-decoration: none; }
+.btn-outline {
+  background: transparent;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+}
+.btn-outline:hover { background: var(--accent-bg); text-decoration: none; }
+
+/* ─── Sidebar nav item active state ─────────────────────────────────────── */
+.nav-item.active {
+  background: var(--accent);
+  color: white !important;
+  border-radius: 7px;
+}

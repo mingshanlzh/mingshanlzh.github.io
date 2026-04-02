@@ -1,0 +1,35 @@
+[
+  {
+    "id": "talk1",
+    "title": "Distributional CEA: Methods and Applications in Australian Health Technology Assessment",
+    "event": "International Health Economics Association (iHEA) World Congress",
+    "location": "Cape Town, South Africa",
+    "date": "2023-07-10",
+    "type": "conference",
+    "slides": "",
+    "video": "",
+    "abstract": ""
+  },
+  {
+    "id": "talk2",
+    "title": "Equity-Informative Economic Evaluation: Where Are We and Where Are We Going?",
+    "event": "Australian Health Economics Society (AHES) Annual Conference",
+    "location": "Melbourne, Australia",
+    "date": "2023-10-15",
+    "type": "conference",
+    "slides": "",
+    "video": "",
+    "abstract": ""
+  },
+  {
+    "id": "talk3",
+    "title": "Introduction to Distributional Cost-Effectiveness Analysis (short course)",
+    "event": "ISPOR Asia Pacific",
+    "location": "Online",
+    "date": "2023-09-05",
+    "type": "workshop",
+    "slides": "",
+    "video": "",
+    "abstract": ""
+  }
+]
