@@ -1,0 +1,22 @@
+{
+  "awards": [
+    {
+      "id": "award1",
+      "title": "AHES Student Prize for Best Paper",
+      "organisation": "Australian Health Economics Society",
+      "year": 2023,
+      "link": "https://ahes.net.au"
+    }
+  ],
+  "grants": [
+    {
+      "id": "grant1",
+      "title": "Macquarie University Research Training Program (RTP) Scholarship",
+      "funder": "Macquarie University / Australian Government",
+      "amount": "",
+      "period": "2022–2025",
+      "role": "Chief Investigator (PhD Scholarship)",
+      "link": ""
+    }
+  ]
+}

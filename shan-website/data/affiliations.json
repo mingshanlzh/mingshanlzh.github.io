@@ -1,0 +1,27 @@
+{
+  "main": [
+    {
+      "id": "aff-main-1",
+      "role": "PhD Student",
+      "institution": "Macquarie University Centre for Health Economy (MUCHE)",
+      "link": "https://www.mq.edu.au/research/research-centres-institutes-and-initiatives/centre-for-health-economy"
+    }
+  ],
+  "adjunct": [
+    {
+      "id": "aff-adj-1",
+      "role": "Adjunct Researcher",
+      "institution": "Shanghai Health Development Research Center",
+      "location": "Shanghai, China",
+      "link": "https://kygl.shdrc.org/"
+    },
+    {
+      "id": "aff-adj-2",
+      "role": "Visiting Research Fellow",
+      "institution": "Brocher Foundation",
+      "location": "Geneva, Switzerland",
+      "period": "March – April 2026",
+      "link": "https://fondation-brocher.ch/"
+    }
+  ]
+}

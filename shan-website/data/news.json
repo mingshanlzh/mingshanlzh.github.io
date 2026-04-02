@@ -1,0 +1,29 @@
+[
+  {
+    "id": "news1",
+    "type": "publication",
+    "title": "New paper accepted in Health Economics on DCEA methodology",
+    "summary": "Our paper reviewing distributional cost-effectiveness analysis methods has been accepted for publication in Health Economics.",
+    "date": "2024-11-15",
+    "link": "",
+    "tags": ["publication", "DCEA"]
+  },
+  {
+    "id": "news2",
+    "type": "talk",
+    "title": "Presented at iHEA World Congress 2023",
+    "summary": "Presented research on distributional CEA applications in Australian HTA at the iHEA World Congress in Cape Town.",
+    "date": "2023-07-10",
+    "link": "",
+    "tags": ["conference", "presentation"]
+  },
+  {
+    "id": "news3",
+    "type": "award",
+    "title": "Received AHES Student Prize for Best Paper",
+    "summary": "Awarded the Australian Health Economics Society Student Prize for best paper at the 2023 annual conference.",
+    "date": "2023-10-16",
+    "link": "",
+    "tags": ["award"]
+  }
+]

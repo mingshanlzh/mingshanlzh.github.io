@@ -1,0 +1,52 @@
+{
+  "organisations": [
+    {
+      "id": "org-1",
+      "role": "Convenor, Health Equity Special Interest Group",
+      "organisation": "Australian Health Economics Society (AHES)",
+      "period": "January 2026 – present",
+      "link": "https://ahes.net.au"
+    },
+    {
+      "id": "org-2",
+      "role": "Secretary, Health Preference Research Special Interest Group",
+      "organisation": "Australian Health Economics Society (AHES)",
+      "period": "2024 – 2025",
+      "link": "https://ahes.net.au"
+    }
+  ],
+  "editorial": [
+    {
+      "id": "ed-1",
+      "role": "Section Editor (Health Economics and Outcomes Research)",
+      "journal": "Advances in Therapy",
+      "publisher": "Springer",
+      "period": "2026 – present",
+      "link": ""
+    },
+    {
+      "id": "ed-2",
+      "role": "Editorial Board Member",
+      "journal": "Advances in Therapy",
+      "publisher": "Springer",
+      "period": "2023 – 2026",
+      "link": ""
+    },
+    {
+      "id": "ed-3",
+      "role": "Editorial Board Member",
+      "journal": "Oncology and Therapy",
+      "publisher": "Springer",
+      "period": "2023 – present",
+      "link": ""
+    },
+    {
+      "id": "ed-4",
+      "role": "Editorial Board Member",
+      "journal": "Clinical Drug Investigation",
+      "publisher": "Springer",
+      "period": "2023 – present",
+      "link": ""
+    }
+  ]
+}
