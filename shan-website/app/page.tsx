@@ -1,11 +1,13 @@
+"use client";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
-  BookOpen, Folder, Trophy, Users, Mic2,
-  Wrench, ExternalLink, ArrowRight, Mail
+  BookOpen, Folder, Trophy, Users, ArrowRight,
+  Edit2, Check, X, Upload, Camera
 } from "lucide-react";
 import profile from "@/data/profile.json";
 import news from "@/data/news.json";
-import { formatDate } from "@/app/lib/utils";
+import { useAdmin } from "@/app/lib/AdminContext";
 
 const typeColor: Record<string, string> = {
   publication: "#5F8FA8",
@@ -14,72 +16,283 @@ const typeColor: Record<string, string> = {
   grant: "#68D391",
 };
 
-const socialLinks = [
-  { label: "Google Scholar", href: profile.links.scholar },
-  { label: "ORCID",         href: profile.links.orcid },
-  { label: "ResearchGate",  href: profile.links.researchgate },
-  { label: "Twitter / X",   href: profile.links.twitter },
-  { label: "GitHub",        href: profile.links.github },
+function formatDate(d: string) {
+  if (!d) return "";
+  return new Date(d).toLocaleDateString("en-AU", { year: "numeric", month: "long", day: "numeric" });
+}
+
+// Social media icons as inline SVGs
+function ScholarIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2L1 8l4 2.18v6L12 19l7-2.82v-6L21 9v7h2V8L12 2zm5 11.59L12 16.5l-5-2.91V11.1L12 14l5-2.9v2.49zM12 11.5L3.23 8 12 4.5 20.77 8 12 11.5z"/>
+    </svg>
+  );
+}
+
+function OrcidIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 256 256" fill="currentColor">
+      <path d="M128 0C57.3 0 0 57.3 0 128s57.3 128 128 128 128-57.3 128-128S198.7 0 128 0zm-16.7 61.3c5.2 0 9.4 4.2 9.4 9.4s-4.2 9.4-9.4 9.4-9.4-4.2-9.4-9.4 4.2-9.4 9.4-9.4zM103 85h18v90h-18V85zm60.8 0c24.4 0 41.2 16.3 41.2 45s-17 44.9-41.5 44.9H138V85h25.8zm-7.8 73.3h7c14.7 0 23.5-8.6 23.5-28.3s-8.6-28.3-23.5-28.3h-7v56.6z"/>
+    </svg>
+  );
+}
+
+function ResearchGateIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 448 512" fill="currentColor">
+      <path d="M0 32v448h448V32H0zm262.2 334.4c-6.6 3.2-41.5 9.2-41.5-25.1V226.2c0-33.8 5.4-60.2 41.5-55.9v31.6c-18.7-.8-21.1 8.7-21.1 24.7v22.6h21.1v25H241v95.5c0 3.5 5.3 13.8 21.2 11.1v-10.4zM340 236.2c0 16-3.9 26.2-14.7 32.8 11.3 5.5 20.1 16.1 20.1 37.8 0 35.7-29.3 43.1-48.7 43.1-22.5 0-48.7-8-48.7-43.1 0-21.7 8.8-32.3 20.1-37.8-10.8-6.6-14.7-16.8-14.7-32.8 0-27.3 20.6-40.3 43.3-40.3 22.7 0 43.3 12.9 43.3 40.3zm-43.3 89.3c12.4 0 20.6-7 20.6-17.5s-8.2-17.5-20.6-17.5-20.6 7-20.6 17.5 8.2 17.5 20.6 17.5zm0-55.3c10.3 0 17-6.1 17-15.9s-6.7-15.9-17-15.9-17 6.1-17 15.9 6.7 15.9 17 15.9z"/>
+    </svg>
+  );
+}
+
+function XIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    </svg>
+  );
+}
+
+function GitHubIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+    </svg>
+  );
+}
+
+function LinkedInIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+    </svg>
+  );
+}
+
+const SOCIAL_CONFIG = [
+  { key: "scholar",      label: "Scholar",      Icon: ScholarIcon,      color: "#4285F4" },
+  { key: "orcid",        label: "ORCID",        Icon: OrcidIcon,        color: "#A6CE39" },
+  { key: "researchgate", label: "ResearchGate", Icon: ResearchGateIcon, color: "#00CCBB" },
+  { key: "twitter",      label: "X / Twitter",  Icon: XIcon,            color: "#000000" },
+  { key: "github",       label: "GitHub",       Icon: GitHubIcon,       color: "#24292E" },
+  { key: "linkedin",     label: "LinkedIn",     Icon: LinkedInIcon,     color: "#0077B5" },
 ];
 
+function circleCropPhoto(file: File): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const size = Math.min(img.width, img.height);
+        const canvas = document.createElement("canvas");
+        canvas.width = 200; canvas.height = 200;
+        const ctx = canvas.getContext("2d")!;
+        ctx.beginPath();
+        ctx.arc(100, 100, 100, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.clip();
+        const sx = (img.width - size) / 2;
+        const sy = (img.height - size) / 2;
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function HomePage() {
+  const { isAdmin } = useAdmin();
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+  const [intro, setIntro] = useState(profile.researchStatement);
+  const [editingIntro, setEditingIntro] = useState(false);
+  const [introDraft, setIntroDraft] = useState(profile.researchStatement);
+  const [links, setLinks] = useState<Record<string, string>>({ ...profile.links, linkedin: "" });
+  const [editingLinks, setEditingLinks] = useState(false);
+  const [linksDraft, setLinksDraft] = useState<Record<string, string>>({ ...profile.links, linkedin: "" });
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Real-time stats from localStorage
+  const [stats, setStats] = useState({ publications: 0, projects: 0, grants: 0, team: 0 });
+
+  useEffect(() => {
+    try {
+      const photo = localStorage.getItem("sj_profile_photo");
+      if (photo) setProfilePhoto(photo);
+      const savedIntro = localStorage.getItem("sj_intro");
+      if (savedIntro) { setIntro(savedIntro); setIntroDraft(savedIntro); }
+      const savedLinks = localStorage.getItem("sj_links");
+      if (savedLinks) {
+        const parsed = JSON.parse(savedLinks);
+        setLinks(parsed);
+        setLinksDraft(parsed);
+      }
+    } catch {}
+  }, []);
+
+  // Compute real-time stats
+  useEffect(() => {
+    try {
+      const pubsRaw = localStorage.getItem("sj_publications");
+      const pubs = pubsRaw ? JSON.parse(pubsRaw) : [];
+      const projectsRaw = localStorage.getItem("sj_projects");
+      const projects = projectsRaw ? JSON.parse(projectsRaw) : [];
+      const activeProjects = projects.filter((p: { status: string }) => p.status === "active").length;
+      const awardsRaw = localStorage.getItem("sj_awards");
+      const awards = awardsRaw ? JSON.parse(awardsRaw) : [];
+      const activeGrants = awards.filter((a: { type: string; status: string }) =>
+        (a.type === "grant" || a.type === "fellowship") && a.status === "active"
+      ).length;
+      const teamRaw = localStorage.getItem("sj_team");
+      const team = teamRaw ? JSON.parse(teamRaw) : [];
+      const activeTeam = team.filter((m: { status: string }) => m.status === "active").length;
+      setStats({
+        publications: pubs.length || profile.stats.publications,
+        projects: activeProjects || profile.stats.workingProjects,
+        grants: activeGrants || profile.stats.activeGrants,
+        team: activeTeam || profile.stats.studentsSupervised,
+      });
+    } catch {}
+  }, []);
+
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const cropped = await circleCropPhoto(file);
+    setProfilePhoto(cropped);
+    localStorage.setItem("sj_profile_photo", cropped);
+  }
+
+  function saveIntro() {
+    setIntro(introDraft);
+    localStorage.setItem("sj_intro", introDraft);
+    setEditingIntro(false);
+  }
+
+  function saveLinks() {
+    setLinks(linksDraft);
+    localStorage.setItem("sj_links", JSON.stringify(linksDraft));
+    setEditingLinks(false);
+  }
+
   const recentNews = [...news]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 4);
+
+  const activeSocialLinks = SOCIAL_CONFIG.filter(({ key }) => links[key]);
 
   return (
     <div style={{ maxWidth: "820px" }}>
       {/* ── Hero ──────────────────────────────────────────────────── */}
       <section className="flex flex-col sm:flex-row gap-8 items-start mb-12">
-        <div className="flex-shrink-0">
-          <div
-            className="w-32 h-32 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-bold"
-            style={{
-              border: "3px solid var(--border)",
-              boxShadow: "var(--shadow-md)",
-              background: "var(--accent-bg)",
-              color: "var(--accent)",
-            }}
-          >
-            SJ
-          </div>
+        <div className="flex-shrink-0 relative">
+          {profilePhoto ? (
+            <img src={profilePhoto} alt="Shan Jiang"
+              className="w-32 h-32 rounded-2xl object-cover"
+              style={{ border: "3px solid var(--border)", boxShadow: "var(--shadow-md)" }} />
+          ) : (
+            <div
+              className="w-32 h-32 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-bold"
+              style={{ border: "3px solid var(--border)", boxShadow: "var(--shadow-md)", background: "var(--accent-bg)", color: "var(--accent)" }}>
+              SJ
+            </div>
+          )}
+          {isAdmin && (
+            <>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} />
+              <button onClick={() => fileRef.current?.click()}
+                className="absolute bottom-1 right-1 p-1.5 rounded-full"
+                style={{ background: "var(--accent)", color: "white", border: "2px solid white" }}
+                title="Upload photo">
+                <Camera size={12} />
+              </button>
+            </>
+          )}
         </div>
+
         <div className="flex-1">
-          <h1 style={{ color: "var(--text-heading)", marginBottom: "0.25rem" }}>
-            {profile.name}
-          </h1>
+          <h1 style={{ color: "var(--text-heading)", marginBottom: "0.25rem" }}>{profile.name}</h1>
           <p style={{ color: "var(--accent)", fontWeight: 600, marginBottom: "0.5rem" }}>
             {profile.title} · {profile.institution}
           </p>
-          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>
-            {profile.location}
-          </p>
-          <p style={{ color: "var(--text-body)", lineHeight: 1.7, marginBottom: "1.25rem" }}>
-            {profile.researchStatement}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {socialLinks.map((s) => (
-              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer"
-                className="btn btn-outline text-xs" style={{ padding: "0.3rem 0.8rem" }}>
-                <ExternalLink size={12} />
-                {s.label}
+          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>{wrofile.location}</p>
+
+          {/* Research statement */}
+          {editingIntro && isAdmin ? (
+            <div className="mb-4">
+              <textarea rows={4} value={introDraft} onChange={(e) => setIntroDraft(e.target.value)}
+                className="w-full rounded-lg px-3 py-2 text-sm"
+                style={{ border: "1.5px solid var(--accent)", outline: "none", background: "var(--bg-primary)", resize: "vertical", lineHeight: 1.7 }} />
+              <div className="flex gap-2 mt-2">
+                <button onClick={saveIntro} className="btn btn-primary text-xs"><Check size={12} /> Save</button>
+                <button onClick={() => { setEditingIntro(false); setIntroDraft(intro); }} className="btn btn-outline text-xs"><X size={12} /> Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <div className="relative mb-4 group">
+              <p style={{ color: "var(--text-body)", lineHeight: 1.7 }}>{intro}</p>
+              {isAdmin && (
+                <button onClick={() => setEditingIntro(true)}
+                  className="absolute -top-1 -right-1 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ background: "var(--accent-bg)" }}>
+                  <Edit2 size={12} style={{ color: "var(--accent)" }} />
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Social links */}
+          <div className="flex flex-wrap gap-2 items-center">
+            {activeSocialLinks.map(({ key, label, Icon, color }) => (
+              <a key={key} href={links[key]} target="_blank" rel="noopener noreferrer"
+                className="btn btn-outline text-xs flex items-center gap-1.5"
+                style={{ padding: "0.3rem 0.7rem", color, borderColor: color + "44" }}>
+                <Icon size={13} />
+                {label}
               </a>
             ))}
-            <a href={`mailto:${profile.links.email}`}
-              className="btn btn-primary text-xs" style={{ padding: "0.3rem 0.8rem" }}>
-              <Mail size={12} /> Email
-            </a>
+            {isAdmin && (
+              <button onClick={() => setEditingLinks(!editingLinks)}
+                className="btn btn-outline text-xs"
+                style={{ padding: "0.3rem 0.7rem", color: "var(--text-muted)" }}>
+                <Edit2 size={12} /> {editingLinks ? "Close" : "Edit links"}
+              </button>
+            )}
           </div>
+
+          {/* Edit social links form */}
+          {editingLinks && isAdmin && (
+            <div className="card mt-4" style={{ border: "1.5px solid var(--accent)" }}>
+              <p className="text-xs font-medium mb-3" style={{ color: "var(--text-heading)" }}>Edit Social Links</p>
+              <div className="flex flex-col gap-2">
+                {SOCIAL_CONFIG.map(({ key, label }) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <span className="text-xs w-28 flex-shrink-0" style={{ color: "var(--text-muted)" }}>{label}</span>
+                    <input value={linksDraft[key] || ""} onChange={(e) => setLinksDraft({ ...linksDraft, [key]: e.target.value })}
+                      placeholder={`https://...`} className="rounded-lg px-2 py-1 text-xs flex-1"
+                      style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 mt-3">
+                <button onClick={saveLinks} className="btn btn-primary text-xs"><Check size={12} /> Save</button>
+                <button onClick={() => { setEditingLinks(false); setLinksDraft(links); }} className="btn btn-outline text-xs"><X size={12} /> Cancel</button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
       {/* ── At-a-glance stats ─────────────────────────────────────── */}
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12">
         {[
-          { icon: BookOpen, label: "Publications", value: profile.stats.publications, href: "/publications" },
-          { icon: Folder,   label: "Projects",     value: profile.stats.workingProjects, href: "/projects" },
-          { icon: Trophy,   label: "Active Grants", value: profile.stats.activeGrants,  href: "/awards" },
-          { icon: Users,    label: "Students",      value: profile.stats.studentsSupervised, href: "/supervision" },
+          { icon: BookOpen, label: "Publications",  value: stats.publications, href: "/publications" },
+          { icon: Folder,   label: "Active Projects", value: stats.projects,  href: "/projects" },
+          { icon: Trophy,   label: "Active Grants", value: stats.grants,      href: "/awards" },
+          { icon: Users,    label: "Team Members",  value: stats.team,        href: "/supervision" },
         ].map(({ icon: Icon, label, value, href }) => (
           <Link key={label} href={href}
             className="card text-center" style={{ textDecoration: "none" }}>
@@ -90,50 +303,6 @@ export default function HomePage() {
             <div className="text-xs" style={{ color: "var(--text-muted)" }}>{label}</div>
           </Link>
         ))}
-      </section>
-
-      {/* ── Research themes ───────────────────────────────────────── */}
-      <section className="mb-12">
-        <h2 className="section-title">Research Themes</h2>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {[
-            { title: "Distributional CEA",
-              desc: "Developing and applying DCEA methods that reveal who gains and loses from health programmes, going beyond aggregate ICERs." },
-            { title: "Methodological Innovation",
-              desc: "Advancing health economic modelling including microsimulation, DES, agent-based models, and Bayesian approaches." },
-            { title: "Global Health Equity",
-              desc: "Applying equity-informative evaluations in low- and middle-income country contexts where distributional concerns are paramount." },
-            { title: "Health Technology Assessment",
-              desc: "Informing PBAC and MSAC submissions with rigorous economic evidence tailored to Australian HTA requirements." },
-          ].map((theme) => (
-            <div key={theme.title} className="card">
-              <h3 className="font-semibold mb-1" style={{ color: "var(--text-heading)", fontSize: "0.95rem" }}>
-                {theme.title}
-              </h3>
-              <p className="text-sm" style={{ color: "var(--text-muted)" }}>{theme.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Professional roles ────────────────────────────────────── */}
-      <section className="mb-12">
-        <h2 className="section-title">Professional Roles</h2>
-        <div className="flex flex-col gap-2">
-          {[
-            "Convenor — AHES Health Equity SIG",
-            "Secretary — ISPOR Health Preference Research SIG",
-            "Peer Reviewer — Health Economics, Value in Health, PharmacoEconomics",
-          ].map((role) => (
-            <div key={role} className="flex items-center gap-3">
-              <Wrench size={14} style={{ color: "var(--accent-soft)", flexShrink: 0 }} />
-              <span className="text-sm" style={{ color: "var(--text-body)" }}>{role}</span>
-            </div>
-          ))}
-        </div>
-        <Link href="/services" className="btn btn-outline mt-4 inline-flex text-sm">
-          View all services <ArrowRight size={14} />
-        </Link>
       </section>
 
       {/* ── Recent news ───────────────────────────────────────────── */}
@@ -150,9 +319,7 @@ export default function HomePage() {
                 {item.type}
               </span>
               <div className="flex-1">
-                <p className="font-medium text-sm" style={{ color: "var(--text-heading)" }}>
-                  {item.title}
-                </p>
+                <p className="font-medium text-sm" style={{ color: "var(--text-heading)" }}>{item.title}</p>
                 <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                   {formatDate(item.date)} · {item.summary}
                 </p>
@@ -162,26 +329,6 @@ export default function HomePage() {
         </div>
         <Link href="/news" className="btn btn-outline mt-4 inline-flex text-sm">
           All news <ArrowRight size={14} />
-        </Link>
-      </section>
-
-      {/* ── Talks snapshot ────────────────────────────────────────── */}
-      <section className="mb-12">
-        <h2 className="section-title">Recent Talks</h2>
-        <div className="flex flex-col gap-2 mb-4">
-          {[
-            "iHEA World Congress 2023 — Cape Town, South Africa",
-            "AHES Annual Conference 2023 — Melbourne, Australia",
-            "ISPOR Asia Pacific 2023 — Short course on DCEA",
-          ].map((t) => (
-            <div key={t} className="flex items-center gap-3">
-              <Mic2 size={14} style={{ color: "var(--accent-soft)", flexShrink: 0 }} />
-              <span className="text-sm" style={{ color: "var(--text-body)" }}>{t}</span>
-            </div>
-          ))}
-        </div>
-        <Link href="/talks" className="btn btn-outline text-sm inline-flex">
-          All talks &amp; presentations <ArrowRight size={14} />
         </Link>
       </section>
     </div>
