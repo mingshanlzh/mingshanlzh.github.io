@@ -5,31 +5,28 @@ import { useState, useRef, useEffect } from "react";
 import {
   Home, BookOpen, FileText, Folder, GraduationCap, Users,
   Mic2, Newspaper, Star, Tv2, Trophy, Wrench, Building2,
-  PenLine, Mail, ChevronRight, Menu, X, Settings, ExternalLink
+  PenLine, Mail, ChevronRight, Menu, X, Settings, UserCircle
 } from "lucide-react";
 import { useAdmin } from "@/app/lib/AdminContext";
 
 const navItems = [
-  { label: "Home",                  href: "/",               icon: Home },
-  { label: "Publications",          href: "/publications",   icon: BookOpen },
-  { label: "CV",                    href: "/cv",             icon: FileText },
-  { label: "Working Projects",      href: "/projects",       icon: Folder },
-  { label: "Teaching",              href: "/teaching",       icon: GraduationCap },
-  { label: "Supervision",           href: "/supervision",    icon: Users },
-  { label: "Talks & Presentations", href: "/talks",          icon: Mic2 },
-  { label: "News & Updates",        href: "/news",           icon: Newspaper },
-  { label: "Selected Research",     href: "/research",       icon: Star },
-  { label: "Media",                 href: "/media",          icon: Tv2 },
-  { label: "Awards & Grants",       href: "/awards",         icon: Trophy },
-  { label: "Services",              href: "/services",       icon: Wrench },
-  { label: "Affiliations",          href: "/affiliations",   icon: Building2 },
-  { label: "Blog",                  href: "/blog",           icon: PenLine },
-  { label: "Contact",               href: "/contact",        icon: Mail },
+  { label: "Home",             href: "/",              icon: Home },
+  { label: "News",             href: "/news",           icon: Newspaper },
+  { label: "Publications",     href: "/publications",   icon: BookOpen },
+  { label: "Featured Research",href: "/research",       icon: Star },
+  { label: "Working Projects", href: "/projects",       icon: Folder },
+  { label: "Talks",            href: "/talks",          icon: Mic2 },
+  { label: "Team",             href: "/supervision",    icon: Users },
+  { label: "Teaching",         href: "/teaching",       icon: GraduationCap },
+  { label: "Media",            href: "/media",          icon: Tv2 },
+  { label: "Awards & Grants",  href: "/awards",         icon: Trophy },
+  { label: "Services",         href: "/services",       icon: Wrench },
+  { label: "Affiliations",     href: "/affiliations",   icon: Building2 },
+  { label: "Blog",             href: "/blog",           icon: PenLine },
+  { label: "CV",               href: "/cv",             icon: FileText },
+  { label: "Contact",          href: "/contact",        icon: Mail },
 ];
 
-// NavList is defined at module level so React never remounts it —
-// this is the key fix that prevents the sidebar from scrolling to the top
-// on every navigation.
 function NavList({
   pathname,
   onLinkClick,
@@ -41,7 +38,6 @@ function NavList({
 }) {
   const navRef = useRef<HTMLDivElement>(null);
 
-  // Persist scroll position in sessionStorage so it survives soft navigations
   useEffect(() => {
     const stored = sessionStorage.getItem("sidebar-scroll");
     if (stored && navRef.current) {
@@ -63,10 +59,8 @@ function NavList({
       style={{ overscrollBehavior: "contain" }}
     >
       {navItems.filter(({ href }) => {
-        // Home is always visible
         if (href === "/") return true;
         const pageId = href.replace("/", "");
-        // If not in visibility map, show by default
         return visiblePages[pageId] !== false;
       }).map(({ label, href, icon: Icon }) => {
         const active =
@@ -75,7 +69,7 @@ function NavList({
           <Link
             key={href}
             href={href}
-            scroll={false}           // ← prevents window from jumping to top
+            scroll={false}
             onClick={onLinkClick}
             className={`nav-item flex items-center gap-3 px-3 py-2 mb-0.5 rounded-lg text-sm transition-all duration-150 ${
               active ? "active" : ""
@@ -97,7 +91,7 @@ function NavList({
 export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const { pageVisibility } = useAdmin();
+  const { pageVisibility, isGuest, guestUser, guestLogout } = useAdmin();
 
   const profile = (
     <div
@@ -131,25 +125,40 @@ export default function Sidebar() {
       className="px-5 pt-4 border-t"
       style={{ borderColor: "rgba(255,255,255,0.08)" }}
     >
+      {isGuest && guestUser ? (
+        <div className="mb-2">
+          <div className="flex items-center gap-2 text-xs mb-1" style={{ color: "var(--text-on-dark)" }}>
+            <UserCircle size={13} />
+            <span>{guestUser.name}</span>
+          </div>
+          <button
+            onClick={guestLogout}
+            className="text-xs transition-colors"
+            style={{ color: "var(--text-on-dark-muted)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+          >
+            Sign out (guest)
+          </button>
+        </div>
+      ) : (
+        <Link
+          href="/guest"
+          scroll={false}
+          className="flex items-center gap-2 text-xs transition-colors mb-2"
+          style={{ color: "var(--text-on-dark-muted)" }}
+        >
+          <UserCircle size={13} />
+          Guest Login
+        </Link>
+      )}
       <Link
         href="/admin"
         scroll={false}
-        className="flex items-center gap-2 text-xs transition-colors mb-2"
-        style={{ color: "var(--text-on-dark-muted)" }}
-      >
-        <Settings size={13} />
-        Admin Panel
-      </Link>
-      <a
-        href="https://scholar.google.com/citations?user=TeSuUycAAAAJ&hl=en"
-        target="_blank"
-        rel="noopener noreferrer"
         className="flex items-center gap-2 text-xs transition-colors"
         style={{ color: "var(--text-on-dark-muted)" }}
       >
-        <ExternalLink size={13} />
-        Google Scholar
-      </a>
+        <Settings size={13} />
+        Admin Login
+      </Link>
     </div>
   );
 
