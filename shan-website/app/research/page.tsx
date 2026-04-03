@@ -1,163 +1,118 @@
-import { Star, Download, ExternalLink, Code } from "lucide-react";
-import publications from "@/data/publications.json";
+"use client";
+import { Star, Download, ExternalLink, Code, Plus, Trash2, Check, X } from "lucide-react";
+import featuredData from "@/data/featured-research.json";
+import { useAdmin } from "@/app/lib/AdminContext";
+import { useState } from "react";
 
-// Featured publications — those marked featured: true in publications.json
-const featured = publications.filter((p) => p.featured);
+type FeaturedPaper = {
+  id: string;
+  title: string;
+  authors: string;
+  journal: string;
+  year: number;
+  abstract: string;
+  keyFindings: string[];
+  tags: string[];
+  doi: string;
+  pdf: string;
+  code: string;
+};
 
-// Placeholder research project pages
-const researchProjects = [
-  {
-    id: "dcea-methods",
-    title: "Distributional Cost-Effectiveness Analysis: A Methodological Framework",
-    year: 2024,
-    authors: "Shan Jiang",
-    journal: "Health Economics",
-    abstract:
-      "This paper develops a unified methodological framework for DCEA, extending standard cost-effectiveness analysis to account for the distributional implications of health technologies across socioeconomic groups.",
-    keyFindings: [
-      "Proposes a standardised equity-weighting procedure adaptable to any ICER-based analysis.",
-      "Demonstrates that DCEA can reverse conventional cost-effectiveness conclusions when equity weights are applied.",
-      "Provides open-source R code and a reproducible workflow using the DCEA package.",
-    ],
-    figures: [
-      { caption: "Equity-weighted NHB by SES quintile", placeholder: true },
-      { caption: "DCEA cost-effectiveness plane", placeholder: true },
-    ],
-    code: "https://github.com/mingshanlzh/dcea-methods",
-    data: "",
-    pdf: "",
-    doi: "",
-    tags: ["DCEA", "equity", "methods", "R"],
-  },
-  {
-    id: "genomic-screening",
-    title: "Equity-Weighted CEA of Universal Newborn Genomic Screening",
-    year: 2024,
-    authors: "Shan Jiang, M Haas, R Viney",
-    journal: "Value in Health",
-    abstract:
-      "We apply DCEA to universal newborn genomic screening in Australia, examining how costs and benefits are distributed across socioeconomic and Indigenous/non-Indigenous groups.",
-    keyFindings: [
-      "Standard ICER favours universal screening; DCEA reveals differential gains favouring disadvantaged groups.",
-      "Equity weights amplify the cost-effectiveness conclusion when society assigns extra weight to health gains in lower SES groups.",
-      "Interactive visualisations allow policymakers to explore outcomes under different social value assumptions.",
-    ],
-    figures: [
-      { caption: "Distribution of net health benefit by SES quintile", placeholder: true },
-      { caption: "Sensitivity of equity-weighted ICER to Atkinson epsilon", placeholder: true },
-    ],
-    code: "https://github.com/mingshanlzh/genomic-screening-dcea",
-    data: "",
-    pdf: "",
-    doi: "",
-    tags: ["DCEA", "genomics", "Australia", "equity"],
-  },
-];
+const blankPaper = (): Omit<FeaturedPaper, "id"> => ({
+  title: "", authors: "", journal: "", year: new Date().getFullYear(),
+  abstract: "", keyFindings: [], tags: [], doi: "", pdf: "", code: "",
+});
 
-function FigurePlaceholder({ caption }: { caption: string }) {
+function PaperCard({ paper, onDelete, isAdmin }: { paper: FeaturedPaper; onDelete: () => void; isAdmin: boolean }) {
   return (
-    <div
-      className="rounded-xl flex flex-col items-center justify-center p-6 text-center"
-      style={{
-        background: "var(--accent-bg)",
-        border: "2px dashed var(--border)",
-        minHeight: "160px",
-      }}
-    >
-      <Star size={20} style={{ color: "var(--accent)", marginBottom: "0.5rem" }} />
-      <p className="text-xs font-medium" style={{ color: "var(--text-heading)" }}>{caption}</p>
-      <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-        Figure / interactive visualisation
-      </p>
-    </div>
-  );
-}
+    <article className="card mb-8">
+      <div className="mb-4">
+        <div className="flex flex-wrap gap-2 mb-2">
+          {paper.tags.map(t => <span key={t} className="tag">{t}</span>)}
+          <span className="tag" style={{ background: "#F0FFF4", color: "#38A169" }}>★ Featured</span>
+        </div>
+        <div className="flex items-start justify-between gap-2">
+          <h2 style={{ fontSize: "1.15rem", lineHeight: 1.35, marginBottom: "0.3rem", flex: 1 }}>
+            {paper.title}
+          </h2>
+          {isAdmin && (
+            "�]ۈې�X��^�ۑ[]_H�\�Ә[YOH�LH��[�Yݙ\���X�]KM��^\��[��L�]OH��[[ݙH���[O^����܎���ML�L�H�_O���\���^�O^�MHς�؝]ۏ��
+_B��]����\�Ә[YOH�^^Ȉ�[O^����܎���\�K]^[]]Y
+H�_O���\\��]]ܜ�H0��[O��\\����\��[O�[O�0���\\��YX\�B�����]�����\\��X���X�	��
+��\�Ә[YOH�^\�HX�MH��[O^����܎���\�K]^X��JH�[�RZY��K��H_O���\\��X���X�B����
+_B���\\���^Q�[�[��˛[���	��
+�]��\�Ә[YOH�X�MH�����\�Ә[YOH��۝\�[ZX��X�LȈ�[O^���۝�^�N���\�[H���܎���\�K]^ZXY[��H�_O���^H�[�[���ς�[�\�Ә[YOH��^�^X���\L�����\\���^Q�[�[��˛X\
 
-export default function ResearchPage() {
-  return (
-    <div style={{ maxWidth: "860px" }}>
-      <h1 style={{ marginBottom: "0.25rem" }}>Selected Research</h1>
-      <p className="mb-8" style={{ color: "var(--text-muted)" }}>
-        Deep dives into my most important papers — with figures, key findings, code, and reproducible workflows.
-        Inspired by how AI/ML researchers present their work.
-      </p>
+�JHO�
+�H�^O^�_H�\�Ә[YOH��^�\L�][\�\�\�^\�H��[O^����܎���\�K]^X��JH�_O���[��\�Ә[YOH��^\��[��L�MHMH��[�YY�[�^][\�X�[�\��\�Y�KX�[�\�^^��۝X��]L�H���[O^���X��ܛ�[����\�KXX��[�
+H���܎���]H�_O���H
+�_B���[���ٟB��O��
+J_B��[���]���
+_B��]��\�Ә[YOH��^�^]ܘ\�\L�LȈ�[O^���ܙ\����\��Y�\�KX�ܙ\�H�_O���\\���	��
+�H�Y�^�\\���H�ۛ�Y�\�Ә[YOH�����\�[X\�H^^Ȉ�[O^��Y[�Έ��ܙ[H��[H�_O���ۛ�Y�^�O^�L�Hψ���O��
+_B��\\���H	��
+�H�Y�^�΋���K�ܙ���\\���_XH\��]H�؛[�Ȉ�[H����[�\��ܙY�\��\����\�Ә[YOH�����[�][�H^^Ȉ�[O^��Y[�Έ��ܙ[H��[H�_O��^\��[[���^�O^�L�Hψ�B��O��
+_B��\\����H	��
+�H�Y�^�\\����_H\��]H�؛[�Ȉ�[H����[�\��ܙY�\��\����\�Ә[YOH�����[�][�H^^Ȉ�[O^��Y[�Έ��ܙ[H��[H�_O����H�^�O^�L�Hψ��B��O��
+_B��]����\�X�O��
+NB��^ܝY�][�[��[ۈ�\�X\��Y�J
+H�ۜ��\�YZ[�HH\�PYZ[�
+N�ۜ��\\���]\\��HH\�T�]O�X]\�Y\\��O��X]\�Y]H\��X]\�Y\\��JN�ۜ��Y[���]Y[��HH\�T�]J�[�JN�ۜ�ٛܛK�]�ܛWHH\�T�]J�[��\\�
+JN�ۜ���^Q�[�[���^�]�^Q�[�[���^HH\�T�]J��N�ۜ��Y��^�]Y��^HH\�T�]J��N��[��[ۈ[�T�]�J
+HY�
+Y�ܛK�]JH�]\���ۜ��]�\\���X]\�Y\\�H����ܛK�Y��\�X\��I�]K����
+_X��^Q�[�[��Έ�^Q�[�[���^��]
+���K�X\
+�O�˝�[J
+JK��[\����X[�K�Y�ΈY��^��]
+��K�X\
+�O�˝�[J
+JK��[\����X[�K�N�]\\��O�ˋ���]�\\�JN�]�ܛJ�[��\\�
+JN�]�^Q�[�[���^
+��N�]Y��^
+��N�]Y[���[�JNB���]\��
+�]��[O^��X^�Y��
+��_O��H�[O^��X\��[����N����[H�_O��X]\�Y�\�X\���O����\\�˛[��OOH	��Z\�YZ[��
+�]��\�Ә[YOH��\���[O^��^[Yێ���[�\��Y[�Έ�ܙ[H��[H��X��ܛ�[����\�KXX��[�X��H�_O���\��^�O^�͟H�[O^����܎���\�KXX��[�
+H�X\��[���]]�\�[H�_Hς��\�Ә[YOH�^\�H��[O^����܎���\�K]^[]]Y
+H�_O���X]\�Y\\���[\X\�\�K��Yۈ[�\�YZ[��Y[K������]���
+H�
+�\\�˛X\
+\\�O�
+�\\��\��^O^�\\��YH\\�^�\\�B�ۑ[]O^�
+HO��]\\��O���[\�O��YOOH\\��Y
+J_B�\�YZ[�^�\�YZ[�Hς�
+JB�
+_B���ʈYZ[��[�[�HY�ܛH
+��B��\�YZ[�	��Y[��	��
+�]��\�Ә[YOH��\�]M��[O^���ܙ\���K�\\�Y�\�KXX��[�
+H�_O���\�Ә[YOH�^^��۝\�[ZX��X�LȈ�[O^����܎���\�KXX��[�
+H�_O�Y�X]\�Y\\����]��\�Ә[YOH�ܚY�N�ܚYX���L��\Lȏ�����^N��]H�X�[��]H
+��X�Z�\����[\\�]H�K���^N��]]ܜȋX�[��]]ܜȋX�Z�\����[��X[����X]]ܸ�)��K���^N����\��[�X�[����\��[�X�Z�\���X[X�ۛ�ZX�ȈK���^N��YX\��X�[��YX\��X�Z�\������K���^N���H�X�[���H
+��H�X�Z�\���L�L��X˞�K���^N����X�[���[��
+��H�X�Z�\���΋�ˋ���K���^N����H�X�[����H[��
+��H�X�Z�\���΋���]X����Kˋ���K�K�X\
 
-      {researchProjects.map((proj) => (
-        <article key={proj.id} id={proj.id} className="card mb-10">
-          {/* Header */}
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-2 mb-2">
-              {proj.tags.map((t) => <span key={t} className="tag">{t}</span>)}
-              <span className="tag" style={{ background: "#F0FFF4", color: "#38A169" }}>★ Featured</span>
-            </div>
-            <h2 style={{ fontSize: "1.2rem", lineHeight: 1.3, marginBottom: "0.3rem" }}>
-              {proj.title}
-            </h2>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {proj.authors} · <em>{proj.journal}</em> · {proj.year}
-            </p>
-          </div>
-
-          {/* Abstract */}
-          <p className="text-sm mb-6" style={{ color: "var(--text-body)", lineHeight: 1.75 }}>
-            {proj.abstract}
-          </p>
-
-          {/* Key findings */}
-          <div className="mb-6">
-            <h3 className="font-semibold mb-3" style={{ fontSize: "0.9rem", color: "var(--text-heading)" }}>
-              Key Findings
-            </h3>
-            <ul className="flex flex-col gap-2">
-              {proj.keyFindings.map((f, i) => (
-                <li key={i} className="flex gap-3 items-start text-sm" style={{ color: "var(--text-body)" }}>
-                  <span
-                    className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5"
-                    style={{ background: "var(--accent)", color: "white" }}
-                  >
-                    {i + 1}
-                  </span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Figures */}
-          <div className="grid sm:grid-cols-2 gap-4 mb-6">
-            {proj.figures.map((fig) => (
-              <FigurePlaceholder key={fig.caption} caption={fig.caption} />
-            ))}
-          </div>
-
-          {/* Actions */}
-          <div className="flex flex-wrap gap-2 pt-4" style={{ borderTop: "1px solid var(--border)" }}>
-            {proj.pdf && (
-              <a href={proj.pdf} download className="btn btn-primary text-xs" style={{ padding: "0.3rem 0.8rem" }}>
-                <Download size={12} /> PDF
-              </a>
-            )}
-            {proj.doi && (
-              <a href={`https://doi.org/${proj.doi}`} target="_blank" rel="noopener noreferrer"
-                className="btn btn-outline text-xs" style={{ padding: "0.3rem 0.8rem" }}>
-                <ExternalLink size={12} /> DOI
-              </a>
-            )}
-            {proj.code && (
-              <a href={proj.code} target="_blank" rel="noopener noreferrer"
-                className="btn btn-outline text-xs" style={{ padding: "0.3rem 0.8rem" }}>
-                <Code size={12} /> Code
-              </a>
-            )}
-            {proj.data && (
-              <a href={proj.data} target="_blank" rel="noopener noreferrer"
-                className="btn btn-outline text-xs" style={{ padding: "0.3rem 0.8rem" }}>
-                <Download size={12} /> Data
-              </a>
-            )}
-          </div>
-        </article>
-      ))}
-    </div>
-  );
-}
+��^KX�[X�Z�\�JHO�
+�]��^O^��^_O��X�[�\�Ә[YOH�����^^��۝[YY][HX�LH��[O^����܎���\�K]^ZXY[��H�_O��X�[O�X�[��[�]\OH�^��[YO^���[��
+�ܛH\��X�ܙ��[����[���[X�\��V��^WJ_HX�Z�\�^�X�Z�\�B�ې�[��O^�HO��]�ܛJ�O�
+�������^WN��^HOOH�YX\����[X�\�K�\��]��[YJH�K�\��]��[YHJJ_B��\�Ә[YOH��Y�[��[�Y[�L�KLK�H^^Ȃ��[O^���ܙ\���K�\��Y�\�KX�ܙ\�H��][�N���ۙH��X��ܛ�[����\�KX��\�[X\�JH�_Hς��]���
+J_B��]���]��\�Ә[YOH�]Lȏ��X�[�\�Ә[YOH�����^^��۝[YY][HX�LH��[O^����܎���\�K]^ZXY[��H�_O�Y��
+��[XK\�\\�]Y
+O�X�[��[�]\OH�^��[YO^�Y��^HX�Z�\�H��PK\]Z]KY]�����ې�[��O^�HO��]Y��^
+K�\��]��[YJ_B��\�Ә[YOH��Y�[��[�Y[�L�KLK�H^^Ȃ��[O^���ܙ\���K�\��Y�\�KX�ܙ\�H��][�N���ۙH��X��ܛ�[����\�KX��\�[X\�JH�_Hς��]���]��\�Ә[YOH�]Lȏ��X�[�\�Ә[YOH�����^^��۝[YY][HX�LH��[O^����܎���\�K]^ZXY[��H�_O�X���X��X�[��^\�XH����^��H�[YO^ٛܛK�X���X�HX�Z�\�H�\\�X���X�8�)���ې�[��O^�HO��]�ܛJ�O�
+�����X���X��K�\��]��[YHJJ_B��\�Ә[YOH��Y�[��[�Y[�L�KLK�H^^Ȃ��[O^���ܙ\���K�\��Y�\�KX�ܙ\�H��][�N���ۙH��X��ܛ�[����\�KX��\�[X\�JH��\�^�N���\�X�[�_Hς��]���]��\�Ә[YOH�]Lȏ��X�[�\�Ә[YOH�����^^��۝[YY][HX�LH��[O^����܎���\�K]^ZXY[��H�_O���^H�[�[���
+ۙH\�[�JB��X�[��^\�XH����^�H�[YO^��^Q�[�[���^HX�Z�\�^ȑ�[�[��W��[�[�����[�[��ȟB�ې�[��O^�HO��]�^Q�[�[���^
+K�\��]��[YJ_B��\�Ә[YOH��Y�[��[�Y[�L�KLK�H^^Ȃ��[O^���ܙ\���K�\��Y�\�KX�ܙ\�H��][�N���ۙH��X��ܛ�[����\�KX��\�[X\�JH��\�^�N���\�X�[�_Hς��]���]��\�Ә[YOH��^�\L�]Lȏ���]ۈې�X��^�[�T�]�_H�\�Ә[YOH�����\�[X\�H^^Ȉ�[O^��Y[�Έ��ܙ[H��[H�_O���X���^�O^�L�Hψ�]�B�؝]ۏ���]ۈې�X��^�
+HO��]Y[���[�J_H�\�Ә[YOH�����[�][�H^^Ȉ�[O^��Y[�Έ��ܙ[H��[H�_O���^�O^�L�Hψ�[��[�؝]ۏ���]����]���
+_B���\�YZ[�	��XY[��	��
+��]ۈې�X��^�
+HO���]Y[���YJN��]�ܛJ�[��\\�
+JN��]�^Q�[�[���^
+��N��]Y��^
+��N�_B��\�Ә[YOH�����[�][�H^^�]M���\��^�O^�L�HψY�X]\�Y\\��؝]ۏ��
+_B���\�YZ[�	��
+�]��\�Ә[YOH��\�]M���[O^���X��ܛ�[����\�KXX��[�X��H�_O���\�Ә[YOH�^^Ȉ�[O^����܎���\�K]^[]]Y
+H�_O����ۙϐYZ[�[�N����ۙψ�[��\�\�H]�H[�\��\��[ۋ��XZ�H[H\�X[�[�[�]YH�][�HYY[��[���O��]\����O�������]���
+_B��]���
+NB
