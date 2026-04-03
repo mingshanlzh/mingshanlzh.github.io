@@ -36,83 +36,178 @@ function PaperCard({ paper, onDelete, isAdmin }: { paper: FeaturedPaper; onDelet
             {paper.title}
           </h2>
           {isAdmin && (
-            "�]ۈې�X��^�ۑ[]_H�\�Ә[YOH�LH��[�Yݙ\���X�]KM��^\��[��L�]OH��[[ݙH���[O^����܎���ML�L�H�_O���\���^�O^�MHς�؝]ۏ��
-_B��]����\�Ә[YOH�^^Ȉ�[O^����܎���\�K]^[]]Y
-H�_O���\\��]]ܜ�H0��[O��\\����\��[O�[O�0���\\��YX\�B�����]�����\\��X���X�	��
-��\�Ә[YOH�^\�HX�MH��[O^����܎���\�K]^X��JH�[�RZY��K��H_O���\\��X���X�B����
-_B���\\���^Q�[�[��˛[���	��
-�]��\�Ә[YOH�X�MH�����\�Ә[YOH��۝\�[ZX��X�LȈ�[O^���۝�^�N���\�[H���܎���\�K]^ZXY[��H�_O���^H�[�[���ς�[�\�Ә[YOH��^�^X���\L�����\\���^Q�[�[��˛X\
+            <button onClick={onDelete} className="p-1 rounded hover:opacity-70 flex-shrink-0" title="Remove"
+              style={{ color: "#E53E3E" }}>
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          {paper.authors} · <em>{paper.journal}</em> · {paper.year}
+        </p>
+      </div>
 
-�JHO�
-�H�^O^�_H�\�Ә[YOH��^�\L�][\�\�\�^\�H��[O^����܎���\�K]^X��JH�_O���[��\�Ә[YOH��^\��[��L�MHMH��[�YY�[�^][\�X�[�\��\�Y�KX�[�\�^^��۝X��]L�H���[O^���X��ܛ�[����\�KXX��[�
-H���܎���]H�_O���H
-�_B���[���ٟB��O��
-J_B��[���]���
-_B��]��\�Ә[YOH��^�^]ܘ\�\L�LȈ�[O^���ܙ\����\��Y�\�KX�ܙ\�H�_O���\\���	��
-�H�Y�^�\\���H�ۛ�Y�\�Ә[YOH�����\�[X\�H^^Ȉ�[O^��Y[�Έ��ܙ[H��[H�_O���ۛ�Y�^�O^�L�Hψ���O��
-_B��\\���H	��
-�H�Y�^�΋���K�ܙ���\\���_XH\��]H�؛[�Ȉ�[H����[�\��ܙY�\��\����\�Ә[YOH�����[�][�H^^Ȉ�[O^��Y[�Έ��ܙ[H��[H�_O��^\��[[���^�O^�L�Hψ�B��O��
-_B��\\����H	��
-�H�Y�^�\\����_H\��]H�؛[�Ȉ�[H����[�\��ܙY�\��\����\�Ә[YOH�����[�][�H^^Ȉ�[O^��Y[�Έ��ܙ[H��[H�_O����H�^�O^�L�Hψ��B��O��
-_B��]����\�X�O��
-NB��^ܝY�][�[��[ۈ�\�X\��Y�J
-H�ۜ��\�YZ[�HH\�PYZ[�
-N�ۜ��\\���]\\��HH\�T�]O�X]\�Y\\��O��X]\�Y]H\��X]\�Y\\��JN�ۜ��Y[���]Y[��HH\�T�]J�[�JN�ۜ�ٛܛK�]�ܛWHH\�T�]J�[��\\�
-JN�ۜ���^Q�[�[���^�]�^Q�[�[���^HH\�T�]J��N�ۜ��Y��^�]Y��^HH\�T�]J��N��[��[ۈ[�T�]�J
-HY�
-Y�ܛK�]JH�]\���ۜ��]�\\���X]\�Y\\�H����ܛK�Y��\�X\��I�]K����
-_X��^Q�[�[��Έ�^Q�[�[���^��]
-���K�X\
-�O�˝�[J
-JK��[\����X[�K�Y�ΈY��^��]
-��K�X\
-�O�˝�[J
-JK��[\����X[�K�N�]\\��O�ˋ���]�\\�JN�]�ܛJ�[��\\�
-JN�]�^Q�[�[���^
-��N�]Y��^
-��N�]Y[���[�JNB���]\��
-�]��[O^��X^�Y��
-��_O��H�[O^��X\��[����N����[H�_O��X]\�Y�\�X\���O����\\�˛[��OOH	��Z\�YZ[��
-�]��\�Ә[YOH��\���[O^��^[Yێ���[�\��Y[�Έ�ܙ[H��[H��X��ܛ�[����\�KXX��[�X��H�_O���\��^�O^�͟H�[O^����܎���\�KXX��[�
-H�X\��[���]]�\�[H�_Hς��\�Ә[YOH�^\�H��[O^����܎���\�K]^[]]Y
-H�_O���X]\�Y\\���[\X\�\�K��Yۈ[�\�YZ[��Y[K������]���
-H�
-�\\�˛X\
-\\�O�
-�\\��\��^O^�\\��YH\\�^�\\�B�ۑ[]O^�
-HO��]\\��O���[\�O��YOOH\\��Y
-J_B�\�YZ[�^�\�YZ[�Hς�
-JB�
-_B���ʈYZ[��[�[�HY�ܛH
-��B��\�YZ[�	��Y[��	��
-�]��\�Ә[YOH��\�]M��[O^���ܙ\���K�\\�Y�\�KXX��[�
-H�_O���\�Ә[YOH�^^��۝\�[ZX��X�LȈ�[O^����܎���\�KXX��[�
-H�_O�Y�X]\�Y\\����]��\�Ә[YOH�ܚY�N�ܚYX���L��\Lȏ�����^N��]H�X�[��]H
-��X�Z�\����[\\�]H�K���^N��]]ܜȋX�[��]]ܜȋX�Z�\����[��X[����X]]ܸ�)��K���^N����\��[�X�[����\��[�X�Z�\���X[X�ۛ�ZX�ȈK���^N��YX\��X�[��YX\��X�Z�\������K���^N���H�X�[���H
-��H�X�Z�\���L�L��X˞�K���^N����X�[���[��
-��H�X�Z�\���΋�ˋ���K���^N����H�X�[����H[��
-��H�X�Z�\���΋���]X����Kˋ���K�K�X\
+      {paper.abstract && (
+        <p className="text-sm mb-5" style={{ color: "var(--text-body)", lineHeight: 1.75 }}>
+          {paper.abstract}
+        </p>
+      )}
 
-��^KX�[X�Z�\�JHO�
-�]��^O^��^_O��X�[�\�Ә[YOH�����^^��۝[YY][HX�LH��[O^����܎���\�K]^ZXY[��H�_O��X�[O�X�[��[�]\OH�^��[YO^���[��
-�ܛH\��X�ܙ��[����[���[X�\��V��^WJ_HX�Z�\�^�X�Z�\�B�ې�[��O^�HO��]�ܛJ�O�
-�������^WN��^HOOH�YX\����[X�\�K�\��]��[YJH�K�\��]��[YHJJ_B��\�Ә[YOH��Y�[��[�Y[�L�KLK�H^^Ȃ��[O^���ܙ\���K�\��Y�\�KX�ܙ\�H��][�N���ۙH��X��ܛ�[����\�KX��\�[X\�JH�_Hς��]���
-J_B��]���]��\�Ә[YOH�]Lȏ��X�[�\�Ә[YOH�����^^��۝[YY][HX�LH��[O^����܎���\�K]^ZXY[��H�_O�Y��
-��[XK\�\\�]Y
-O�X�[��[�]\OH�^��[YO^�Y��^HX�Z�\�H��PK\]Z]KY]�����ې�[��O^�HO��]Y��^
-K�\��]��[YJ_B��\�Ә[YOH��Y�[��[�Y[�L�KLK�H^^Ȃ��[O^���ܙ\���K�\��Y�\�KX�ܙ\�H��][�N���ۙH��X��ܛ�[����\�KX��\�[X\�JH�_Hς��]���]��\�Ә[YOH�]Lȏ��X�[�\�Ә[YOH�����^^��۝[YY][HX�LH��[O^����܎���\�K]^ZXY[��H�_O�X���X��X�[��^\�XH����^��H�[YO^ٛܛK�X���X�HX�Z�\�H�\\�X���X�8�)���ې�[��O^�HO��]�ܛJ�O�
-�����X���X��K�\��]��[YHJJ_B��\�Ә[YOH��Y�[��[�Y[�L�KLK�H^^Ȃ��[O^���ܙ\���K�\��Y�\�KX�ܙ\�H��][�N���ۙH��X��ܛ�[����\�KX��\�[X\�JH��\�^�N���\�X�[�_Hς��]���]��\�Ә[YOH�]Lȏ��X�[�\�Ә[YOH�����^^��۝[YY][HX�LH��[O^����܎���\�K]^ZXY[��H�_O���^H�[�[���
-ۙH\�[�JB��X�[��^\�XH����^�H�[YO^��^Q�[�[���^HX�Z�\�^ȑ�[�[��W��[�[�����[�[��ȟB�ې�[��O^�HO��]�^Q�[�[���^
-K�\��]��[YJ_B��\�Ә[YOH��Y�[��[�Y[�L�KLK�H^^Ȃ��[O^���ܙ\���K�\��Y�\�KX�ܙ\�H��][�N���ۙH��X��ܛ�[����\�KX��\�[X\�JH��\�^�N���\�X�[�_Hς��]���]��\�Ә[YOH��^�\L�]Lȏ���]ۈې�X��^�[�T�]�_H�\�Ә[YOH�����\�[X\�H^^Ȉ�[O^��Y[�Έ��ܙ[H��[H�_O���X���^�O^�L�Hψ�]�B�؝]ۏ���]ۈې�X��^�
-HO��]Y[���[�J_H�\�Ә[YOH�����[�][�H^^Ȉ�[O^��Y[�Έ��ܙ[H��[H�_O���^�O^�L�Hψ�[��[�؝]ۏ���]����]���
-_B���\�YZ[�	��XY[��	��
-��]ۈې�X��^�
-HO���]Y[���YJN��]�ܛJ�[��\\�
-JN��]�^Q�[�[���^
-��N��]Y��^
-��N�_B��\�Ә[YOH�����[�][�H^^�]M���\��^�O^�L�HψY�X]\�Y\\��؝]ۏ��
-_B���\�YZ[�	��
-�]��\�Ә[YOH��\�]M���[O^���X��ܛ�[����\�KXX��[�X��H�_O���\�Ә[YOH�^^Ȉ�[O^����܎���\�K]^[]]Y
-H�_O����ۙϐYZ[�[�N����ۙψ�[��\�\�H]�H[�\��\��[ۋ��XZ�H[H\�X[�[�[�]YH�][�HYY[��[���O��]\����O�������]���
-_B��]���
-NB
+      {paper.keyFindings.length > 0 && (
+        <div className="mb-5">
+          <h3 className="font-semibold mb-3" style={{ fontSize: "0.9rem", color: "var(--text-heading)" }}>
+            Key Findings
+          </h3>
+          <ul className="flex flex-col gap-2">
+            {paper.keyFindings.map((f, i) => (
+              <li key={i} className="flex gap-3 items-start text-sm" style={{ color: "var(--text-body)" }}>
+                <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold mt-0.5"
+                  style={{ background: "var(--accent)", color: "white" }}>
+                  {i + 1}
+                </span>
+                {f}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
+        {paper.pdf && (
+          <a href={paper.pdf} download className="btn btn-primary text-xs" style={{ padding: "0.3rem 0.8rem" }}>
+            <Download size={12} /> PDF
+          </a>
+        )}
+        {paper.doi && (
+          <a href={`https://doi.org/${paper.doi}`} target="_blank" rel="noopener noreferrer"
+            className="btn btn-outline text-xs" style={{ padding: "0.3rem 0.8rem" }}>
+            <ExternalLink size={12} /> DOI
+          </a>
+        )}
+        {paper.code && (
+          <a href={paper.code} target="_blank" rel="noopener noreferrer"
+            className="btn btn-outline text-xs" style={{ padding: "0.3rem 0.8rem" }}>
+            <Code size={12} /> Code
+          </a>
+        )}
+      </div>
+    </article>
+  );
+}
+
+export default function ResearchPage() {
+  const { isAdmin } = useAdmin();
+  const [papers, setPapers] = useState<FeaturedPaper[]>(featuredData as FeaturedPaper[]);
+  const [adding, setAdding] = useState(false);
+  const [form, setForm] = useState(blankPaper());
+  const [keyFindingsText, setKeyFindingsText] = useState("");
+  const [tagsText, setTagsText] = useState("");
+
+  function handleSave() {
+    if (!form.title) return;
+    const newPaper: FeaturedPaper = {
+      ...form,
+      id: `research-${Date.now()}`,
+      keyFindings: keyFindingsText.split("\n").map(s => s.trim()).filter(Boolean),
+      tags: tagsText.split(",").map(s => s.trim()).filter(Boolean),
+    };
+    setPapers(p => [...p, newPaper]);
+    setForm(blankPaper());
+    setKeyFindingsText("");
+    setTagsText("");
+    setAdding(false);
+  }
+
+  return (
+    <div style={{ maxWidth: "860px" }}>
+      <h1 style={{ marginBottom: "2rem" }}>Featured Research</h1>
+
+      {papers.length === 0 && !isAdmin ? (
+        <div className="card" style={{ textAlign: "center", padding: "3rem 2rem", background: "var(--accent-bg)" }}>
+          <Star size={36} style={{ color: "var(--accent)", margin: "0 auto 1rem" }} />
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            Featured papers will appear here. Sign in as admin to add them.
+          </p>
+        </div>
+      ) : (
+        papers.map(paper => (
+          <PaperCard key={paper.id} paper={paper}
+            onDelete={() => setPapers(p => p.filter(x => x.id !== paper.id))}
+            isAdmin={isAdmin} />
+        ))
+      )}
+
+      {/* Admin: inline add form */}
+      {isAdmin && adding && (
+        <div className="card mt-4" style={{ border: "1.5px dashed var(--accent)" }}>
+          <p className="text-xs font-semibold mb-3" style={{ color: "var(--accent)" }}>Add featured paper</p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {[
+              { key: "title",   label: "Title *",         placeholder: "Full paper title" },
+              { key: "authors", label: "Authors",         placeholder: "Shan Jiang, Co-author…" },
+              { key: "journal", label: "Journal",         placeholder: "Health Economics" },
+              { key: "year",    label: "Year",            placeholder: "2024" },
+              { key: "doi",     label: "DOI (opt.)",      placeholder: "10.1002/hec.xxxx" },
+              { key: "pdf",     label: "PDF link (opt.)", placeholder: "https://..." },
+              { key: "code",    label: "Code link (opt.)", placeholder: "https://github.com/..." },
+            ].map(({ key, label, placeholder }) => (
+              <div key={key}>
+                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>{label}</label>
+                <input type="text" value={String((form as Record<string, string | number>)[key])} placeholder={placeholder}
+                  onChange={e => setForm(f => ({ ...f, [key]: key === "year" ? Number(e.target.value) : e.target.value }))}
+                  className="w-full rounded-lg px-2 py-1.5 text-xs"
+                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+              </div>
+            ))}
+          </div>
+          <div className="mt-3">
+            <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Tags (comma-separated)</label>
+            <input type="text" value={tagsText} placeholder="DCEA, equity, methods, R"
+              onChange={e => setTagsText(e.target.value)}
+              className="w-full rounded-lg px-2 py-1.5 text-xs"
+              style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+          </div>
+          <div className="mt-3">
+            <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Abstract</label>
+            <textarea rows={3} value={form.abstract} placeholder="Paper abstract…"
+              onChange={e => setForm(f => ({ ...f, abstract: e.target.value }))}
+              className="w-full rounded-lg px-2 py-1.5 text-xs"
+              style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", resize: "vertical" }} />
+          </div>
+          <div className="mt-3">
+            <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>
+              Key Findings (one per line)
+            </label>
+            <textarea rows={4} value={keyFindingsText} placeholder={"Finding 1\nFinding 2\nFinding 3"}
+              onChange={e => setKeyFindingsText(e.target.value)}
+              className="w-full rounded-lg px-2 py-1.5 text-xs"
+              style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", resize: "vertical" }} />
+          </div>
+          <div className="flex gap-2 mt-3">
+            <button onClick={handleSave} className="btn btn-primary text-xs" style={{ padding: "0.3rem 0.8rem" }}>
+              <Check size={12} /> Save
+            </button>
+            <button onClick={() => setAdding(false)} className="btn btn-outline text-xs" style={{ padding: "0.3rem 0.8rem" }}>
+              <X size={12} /> Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isAdmin && !adding && (
+        <button onClick={() => { setAdding(true); setForm(blankPaper()); setKeyFindingsText(""); setTagsText(""); }}
+          className="btn btn-outline text-xs mt-4">
+          <Plus size={12} /> Add featured paper
+        </button>
+      )}
+
+      {isAdmin && (
+        <div className="card mt-6" style={{ background: "var(--accent-bg)" }}>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            <strong>Admin mode:</strong> Changes are live in this session. To make them permanent, tell Claude what you added and run <code>git push</code>.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
