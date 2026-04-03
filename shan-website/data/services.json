@@ -5,14 +5,14 @@
       "role": "Convenor, Health Equity Special Interest Group",
       "organisation": "Australian Health Economics Society (AHES)",
       "period": "January 2026 – present",
-      "link": "https://ahes.net.au"
+      "link": "https://ahes.org.au/ahes/resources/special-interest-group/health-equity/"
     },
     {
       "id": "org-2",
       "role": "Secretary, Health Preference Research Special Interest Group",
       "organisation": "Australian Health Economics Society (AHES)",
       "period": "2024 – 2025",
-      "link": "https://ahes.net.au"
+      "link": "https://ahes.org.au/ahes/resources/special-interest-group/health-equity/"
     }
   ],
   "editorial": [
@@ -22,7 +22,7 @@
       "journal": "Advances in Therapy",
       "publisher": "Springer",
       "period": "2026 – present",
-      "link": ""
+      "link": "https://link.springer.com/journal/12325/editorial-board"
     },
     {
       "id": "ed-2",
@@ -30,7 +30,7 @@
       "journal": "Advances in Therapy",
       "publisher": "Springer",
       "period": "2023 – 2026",
-      "link": ""
+      "link": "https://link.springer.com/journal/12325/editorial-board"
     },
     {
       "id": "ed-3",
@@ -38,7 +38,7 @@
       "journal": "Oncology and Therapy",
       "publisher": "Springer",
       "period": "2023 – present",
-      "link": ""
+      "link": "https://link.springer.com/journal/40487/editorial-board"
     },
     {
       "id": "ed-4",
@@ -46,7 +46,7 @@
       "journal": "Clinical Drug Investigation",
       "publisher": "Springer",
       "period": "2023 – present",
-      "link": ""
+      "link": "https://link.springer.com/journal/40261/editorial-board"
     }
   ]
 }

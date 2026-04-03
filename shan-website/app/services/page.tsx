@@ -68,6 +68,12 @@ export default function ServicesPage() {
               <Calendar size={10} /> {item.period}
             </span>
           )}
+          {item.link && (
+            <a href={item.link} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs mt-1" style={{ color: "var(--accent)" }}>
+              <ExternalLink size={10} /> Editorial board
+            </a>
+          )}
         </div>
         {isAdmin && (
           <button onClick={() => setEd(p => p.filter(x => x.id !== item.id))}
