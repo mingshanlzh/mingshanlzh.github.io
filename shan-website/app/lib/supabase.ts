@@ -78,6 +78,9 @@ export type Publication = {
   pub_type: string;
   status: string;
   sort_order: number;
+  highlight_text?: string;
+  highlight_labels?: string[];
+  highlight_pdf?: string;
 };
 
 export type NewsItem = {
