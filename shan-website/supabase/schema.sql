@@ -1,216 +1,187 @@
 -- =========================================================
--- Shan Jiang Academic Website — Supabase Schema
--- Run this in your Supabase SQL editor to initialise all tables.
+-- Shan Jiang Academic Website â Supabase Schema v2
+-- Run this entire file in your Supabase SQL Editor.
 -- =========================================================
 
--- Enable row level security extension
 create extension if not exists "uuid-ossp";
+create extension if not exists "pgcrypto";
 
--- ─── USERS / COLLABORATORS ───────────────────────────────────────────────────
--- Supabase Auth handles authentication; this table stores extra profile data.
-create table public.user_profiles (
-  id          uuid references auth.users(id) on delete cascade primary key,
+-- âââ HELPER: is_admin() ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+-- Returns true if the currently authenticated user has role = 'admin'
+create or replace function public.is_admin()
+returns boolean language sql security definer stable as $$
+  select exists (
+    select 1 from public.user_profiles
+    where id = auth.uid() and role = 'admin'
+  );
+$$;
+
+-- âââ USER PROFILES (extends Supabase Auth) âââââââââââââââââââââââââââââââââââ
+create table if not exists public.user_profiles (
+  id           uuid references auth.users(id) on delete cascade primary key,
   display_name text,
-  affiliation  text,
-  role         text default 'collaborator', -- 'admin' | 'collaborator'
+  role         text default 'viewer',  -- 'admin' | 'viewer'
   created_at   timestamptz default now()
 );
-
 alter table public.user_profiles enable row level security;
-
--- Users can read their own profile
-create policy "user read own profile" on public.user_profiles
+create policy "users read own profile" on public.user_profiles
   for select using (auth.uid() = id);
--- Only admin can write profiles
-create policy "admin manage profiles" on public.user_profiles
-  for all using (
-    exists (
-      select 1 from public.user_profiles p
-      where p.id = auth.uid() and p.role = 'admin'
-    )
-  );
+create policy "admin full access profiles" on public.user_profiles
+  for all using (public.is_admin());
 
--- ─── PROJECTS ────────────────────────────────────────────────────────────────
-create table public.projects (
-  id            uuid default uuid_generate_v4() primary key,
-  title         text not null,
-  description   text,
-  milestone     int default 0, -- index into milestones array
-  tags          text[] default '{}',
-  last_updated  timestamptz default now(),
-  created_at    timestamptz default now(),
-  visible       boolean default true
+-- âââ GUEST ACCOUNTS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+create table if not exists public.guest_accounts (
+  id                 uuid default uuid_generate_v4() primary key,
+  username           text unique not null,
+  password           text not null,
+  display_name       text,
+  collaborator_label text,
+  active             boolean default true,
+  created_at         timestamptz default now()
 );
+alter table public.guest_accounts enable row level security;
+-- Block direct anonymous access; use the RPC function instead
+create policy "no direct anon read" on public.guest_accounts
+  for select using (public.is_admin());
+create policy "admin manage guests" on public.guest_accounts
+  for all using (public.is_admin());
 
-alter table public.projects enable row level security;
+-- RPC: verify guest credentials (runs with elevated privileges, bypasses RLS)
+create or replace function public.guest_login(p_username text, p_password text)
+returns jsonb language plpgsql security definer as $$
+declare
+  acct public.guest_accounts;
+begin
+  select * into acct
+  from public.guest_accounts
+  where username = p_username
+    and password = p_password
+    and active = true;
 
--- ─── PROJECT MEMBERSHIPS ─────────────────────────────────────────────────────
-create table public.project_members (
-  project_id uuid references public.projects(id) on delete cascade,
-  user_id    uuid references auth.users(id) on delete cascade,
-  primary key (project_id, user_id)
-);
+  if acct.id is null then
+    return null;
+  end if;
 
-alter table public.project_members enable row level security;
-
--- Collaborators can see only their own projects
-create policy "member sees own projects" on public.projects
-  for select using (
-    exists (
-      select 1 from public.project_members pm
-      where pm.project_id = id and pm.user_id = auth.uid()
-    )
-    or
-    exists (
-      select 1 from public.user_profiles up
-      where up.id = auth.uid() and up.role = 'admin'
-    )
+  return jsonb_build_object(
+    'id',                acct.id,
+    'username',          acct.username,
+    'display_name',      coalesce(acct.display_name, acct.username),
+    'collaborator_label', acct.collaborator_label
   );
+end;
+$$;
+grant execute on function public.guest_login(text, text) to anon, authenticated;
 
-create policy "member sees own memberships" on public.project_members
-  for select using (user_id = auth.uid());
-
--- Admin can do everything on projects
-create policy "admin manage projects" on public.projects
-  for all using (
-    exists (
-      select 1 from public.user_profiles up
-      where up.id = auth.uid() and up.role = 'admin'
-    )
-  );
-
--- ─── DOCUMENT UPLOADS ────────────────────────────────────────────────────────
-create table public.uploads (
-  id          uuid default uuid_generate_v4() primary key,
-  project_id  uuid references public.projects(id) on delete cascade,
-  uploader_id uuid references auth.users(id) on delete set null,
-  filename    text not null,
-  storage_path text not null,  -- path in Supabase Storage bucket 'uploads'
-  note        text,
-  created_at  timestamptz default now()
-);
-
-alter table public.uploads enable row level security;
-
-create policy "uploader sees own uploads" on public.uploads
-  for select using (uploader_id = auth.uid());
-create policy "member uploads to project" on public.uploads
-  for insert with check (
-    exists (
-      select 1 from public.project_members pm
-      where pm.project_id = project_id and pm.user_id = auth.uid()
-    )
-  );
-create policy "admin sees all uploads" on public.uploads
-  for all using (
-    exists (
-      select 1 from public.user_profiles up
-      where up.id = auth.uid() and up.role = 'admin'
-    )
-  );
-
--- ─── CV DOWNLOAD REQUESTS ────────────────────────────────────────────────────
-create table public.cv_requests (
-  id          uuid default uuid_generate_v4() primary key,
-  name        text not null,
-  email       text not null,
-  affiliation text,
-  reason      text,
-  approved    boolean default false,
-  created_at  timestamptz default now()
-);
-
-alter table public.cv_requests enable row level security;
-
--- Anyone can insert a request (public form)
-create policy "public submit cv request" on public.cv_requests
-  for insert with check (true);
--- Only admin can read/approve
-create policy "admin manage cv requests" on public.cv_requests
-  for all using (
-    exists (
-      select 1 from public.user_profiles up
-      where up.id = auth.uid() and up.role = 'admin'
-    )
-  );
-
--- ─── CONTACT MESSAGES ────────────────────────────────────────────────────────
-create table public.contact_messages (
-  id          uuid default uuid_generate_v4() primary key,
-  name        text not null,
-  email       text not null,
-  subject     text,
-  message     text not null,
-  read        boolean default false,
-  created_at  timestamptz default now()
-);
-
-alter table public.contact_messages enable row level security;
-
-create policy "public send message" on public.contact_messages
-  for insert with check (true);
-create policy "admin read messages" on public.contact_messages
-  for all using (
-    exists (
-      select 1 from public.user_profiles up
-      where up.id = auth.uid() and up.role = 'admin'
-    )
-  );
-
--- ─── NEWS ITEMS ──────────────────────────────────────────────────────────────
-create table public.news_items (
-  id          uuid default uuid_generate_v4() primary key,
-  type        text not null, -- 'publication' | 'talk' | 'award' | 'media' | 'blog'
-  title       text not null,
-  summary     text,
-  link        text,
-  item_date   date not null,
-  tags        text[] default '{}',
-  created_at  timestamptz default now()
-);
-
-alter table public.news_items enable row level security;
-
-create policy "public read news" on public.news_items
-  for select using (true);
-create policy "admin manage news" on public.news_items
-  for all using (
-    exists (
-      select 1 from public.user_profiles up
-      where up.id = auth.uid() and up.role = 'admin'
-    )
-  );
-
--- ─── PAGE VISIBILITY ─────────────────────────────────────────────────────────
-create table public.page_config (
-  page_id   text primary key,
-  visible   boolean default true,
+-- âââ PAGE VISIBILITY âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+create table if not exists public.page_config (
+  page_id    text primary key,
+  visible    boolean default true,
   updated_at timestamptz default now()
 );
-
 alter table public.page_config enable row level security;
-
 create policy "public read page config" on public.page_config
   for select using (true);
 create policy "admin manage page config" on public.page_config
-  for all using (
-    exists (
-      select 1 from public.user_profiles up
-      where up.id = auth.uid() and up.role = 'admin'
-    )
-  );
+  for all using (public.is_admin());
 
--- Seed default page visibility
 insert into public.page_config (page_id, visible) values
-  ('publications', true), ('cv', true), ('projects', true),
-  ('teaching', true), ('supervision', true), ('talks', true),
-  ('news', true), ('research', true), ('media', true),
-  ('awards', true), ('services', true), ('affiliations', true),
-  ('blog', true), ('contact', true);
+  ('publications', true), ('cv', true),          ('projects', true),
+  ('teaching', true),     ('supervision', true),  ('talks', true),
+  ('news', true),         ('research', true),     ('media', true),
+  ('awards', true),       ('services', true),     ('affiliations', true),
+  ('blog', true),         ('contact', true)
+on conflict (page_id) do nothing;
 
--- =========================================================
--- STORAGE BUCKET (run in Supabase dashboard or via CLI)
--- =========================================================
--- create storage bucket 'uploads' (private)
--- create storage bucket 'cv' (private — only admin can generate signed URLs)
--- create storage bucket 'slides' (public — for teaching/talk slides)
+-- âââ CONTACT MESSAGES ââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+create table if not exists public.contact_messages (
+  id             uuid default uuid_generate_v4() primary key,
+  name           text not null,
+  email          text not null,
+  subject        text,
+  message        text not null,
+  guest_username text,          -- set when sent by a logged-in guest
+  read           boolean default false,
+  created_at     timestamptz default now()
+);
+alter table public.contact_messages enable row level security;
+create policy "anyone can send message" on public.contact_messages
+  for insert with check (true);
+create policy "admin manages messages" on public.contact_messages
+  for all using (public.is_admin());
+
+-- âââ AWARDS & GRANTS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+create table if not exists public.awards (
+  id           uuid default uuid_generate_v4() primary key,
+  entry_type   text not null default 'award',  -- 'award' | 'grant'
+  title        text not null,
+  organisation text,   -- for awards
+  year         integer, -- for awards
+  funder       text,   -- for grants
+  amount       text,   -- for grants
+  period       text,   -- for grants
+  role         text,   -- for grants
+  link         text,
+  sort_order   integer default 0,
+  created_at   timestamptz default now()
+);
+alter table public.awards enable row level security;
+create policy "public read awards" on public.awards
+  for select using (true);
+create policy "admin manage awards" on public.awards
+  for all using (public.is_admin());
+
+-- âââ PUBLICATIONS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+create table if not exists public.publications (
+  id         uuid default uuid_generate_v4() primary key,
+  title      text not null,
+  authors    text,                              -- display string, e.g. "Jiang S, Smith J, et al."
+  journal    text,
+  year       integer,
+  volume     text,
+  pages      text,
+  doi        text,
+  url        text,
+  pdf        text,
+  tags       text[] default '{}',
+  featured   boolean default false,
+  pub_type   text default 'journal',            -- 'journal'|'conference'|'book'|'preprint'
+  status     text default 'published',          -- 'published'|'in_press'|'preprint'
+  sort_order integer default 0,
+  created_at timestamptz default now()
+);
+alter table public.publications enable row level security;
+create policy "public read publications" on public.publications
+  for select using (true);
+create policy "admin manage publications" on public.publications
+  for all using (public.is_admin());
+
+-- âââ PROJECTS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+create table if not exists public.projects (
+  id                  uuid default uuid_generate_v4() primary key,
+  title               text not null,
+  description         text,
+  summary             text,                        -- guest-visible summary
+  status              text default 'active',       -- 'active' | 'completed' | 'paused'
+  tags                text[] default '{}',
+  collaborator_labels text[] default '{}',
+  notice              text,
+  notice_type         text default 'info',         -- 'info' | 'warning' | 'success'
+  documents           jsonb default '[]',
+  last_updated        text,
+  created_at          timestamptz default now(),
+  updated_at          timestamptz default now()
+);
+alter table public.projects enable row level security;
+create policy "public read projects" on public.projects
+  for select using (true);
+create policy "admin manage projects" on public.projects
+  for all using (public.is_admin());
+
+-- âââ AFTER RUNNING THIS FILE âââââââââââââââââââââââââââââââââââââââââââââââââ
+-- 1. Go to Authentication â Users â Add User and sign up with shan.jiang@mq.edu.au
+-- 2. Then run:
+--    INSERT INTO public.user_profiles (id, display_name, role)
+--    VALUES ('<paste-your-user-id-here>', 'Shan Jiang', 'admin');
+-- 3. Your admin account is now active.
+-- 4. Go to Project Settings â API to get your URL and anon key.
+-- 5. Add them as GitHub secrets: NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY
