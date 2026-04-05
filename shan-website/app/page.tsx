@@ -158,8 +158,7 @@ export default function HomePage() {
     } catch {}
   }, []);
 
-  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {   const file = e.target.files?.[0];
     if (!file) return;
     const cropped = await circleCropPhoto(file);
     setProfilePhoto(cropped);
@@ -218,7 +217,7 @@ export default function HomePage() {
           <p style={{ color: "var(--accent)", fontWeight: 600, marginBottom: "0.5rem" }}>
             {profile.title} · {profile.institution}
           </p>
-          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>{wrofile.location}</p>
+          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>{profile.location}</p>
 
           {/* Research statement */}
           {editingIntro && isAdmin ? (
