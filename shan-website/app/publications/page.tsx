@@ -177,25 +177,6 @@ export default function PublicationsPage() {
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Year *</label>
                 <input required type="number" value={form.year} onChange={(e) => setForm({ ...form, year: Number(e.target.value) })}
-               }} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Authors *</label>
-              <input required value={form.authors} onChange={(e) => setForm({ ...form, authors: e.target.value })}
-                className="w-full rounded-lg px-3 py-2 text-sm"
-                style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}
-                placeholder="Last FM, Jiang S, et al." />
-            </div>
-            <div className="grid sm:grid-cols-3 gap-3">
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Journal *</label>
-                <input required value={form.journal} onChange={(e) => setForm({ ...form, journal: e.target.value })}
-                  className="w-full rounded-lg px-3 py-2 text-sm"
-                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
-              </div>
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Year *</label>
-                <input required type="number" value={form.year} onChange={(e) => setForm({ ...form, year: Number(e.target.value) })}
                   className="w-full rounded-lg px-3 py-2 text-sm"
                   style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
               </div>
