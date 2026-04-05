@@ -168,12 +168,12 @@ export default function AdminPage() {
                 onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                 className="w-full rounded-lg px-3 py-2 text-sm"
                 style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}
-                placeholder="â¢â¢â¢â¢â¢â¢â¢â¢"
+                placeholder="Enter your password"
               />
             </div>
             {loginError && <p className="text-xs" style={{ color: "#E53E3E" }}>{loginError}</p>}
             <button type="submit" disabled={loginLoading} className="btn btn-primary">
-              <LogIn size={15} /> {loginLoading ? "Signing inâ¦" : "Sign In"}
+              <LogIn size={15} /> {loginLoading ? "Signing in…" : "Sign In"}
             </button>
           </form>
         </div>
@@ -212,7 +212,7 @@ export default function AdminPage() {
         ))}
       </div>
 
-      {/* ââ PAGE VISIBILITY âââââââââââââââââââââââââââââââââââââââââ */}
+      {/* ── PAGE VISIBILITY ───────────────────────────────────────── */}
       {activeTab === "pages" && (
         <div>
           <h2 className="section-title">Page Visibility</h2>
@@ -242,7 +242,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ââ GUEST ACCOUNTS ââââââââââââââââââââââââââââââââââââââââââ */}
+      {/* ── GUEST ACCOUNTS ────────────────────────────────────────── */}
       {activeTab === "guests" && (
         <div>
           <div className="flex items-center justify-between mb-4">
@@ -314,7 +314,7 @@ export default function AdminPage() {
                 </div>
                 <div className="flex gap-2 pt-1">
                   <button type="submit" disabled={guestSaving} className="btn btn-primary text-sm">
-                    <Check size={14} /> {guestSaving ? "Savingâ¦" : editGuestId ? "Save Changes" : "Create Account"}
+                    <Check size={14} /> {guestSaving ? "Saving…" : editGuestId ? "Save Changes" : "Create Account"}
                   </button>
                   <button type="button" onClick={() => { setShowGuestForm(false); setEditGuestId(null); }} className="btn btn-outline text-sm">Cancel</button>
                 </div>
@@ -323,7 +323,7 @@ export default function AdminPage() {
           )}
 
           {!guestsLoaded && (
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loadingâ¦</p>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading…</p>
           )}
 
           {guestsLoaded && guests.length === 0 && !showGuestForm && (
@@ -355,7 +355,7 @@ export default function AdminPage() {
                       {showPasswords[acct.id] ? (
                         <code className="text-xs" style={{ background: "var(--accent-bg)", padding: "0.1rem 0.3rem", borderRadius: "0.25rem" }}>{acct.password}</code>
                       ) : (
-                        <code className="text-xs" style={{ color: "var(--text-muted)" }}>â¢â¢â¢â¢â¢â¢</code>
+                        <code className="text-xs" style={{ color: "var(--text-muted)" }}>••••••</code>
                       )}
                       <button onClick={() => setShowPasswords((p) => ({ ...p, [acct.id]: !p[acct.id] }))}
                         className="text-xs" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--accent)" }}>
@@ -379,7 +379,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* ââ MESSAGES ââââââââââââââââââââââââââââââââââââââââââââââââ */}
+      {/* ── MESSAGES ──────────────────────────────────────────────── */}
       {activeTab === "messages" && (
         <div>
           <h2 className="section-title">Contact Form Messages</h2>
@@ -388,7 +388,7 @@ export default function AdminPage() {
           </p>
 
           {!messagesLoaded && (
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loadingâ¦</p>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading…</p>
           )}
 
           {messagesLoaded && messages.length === 0 && (
