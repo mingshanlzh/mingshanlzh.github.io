@@ -348,7 +348,7 @@ export default function AdminPage() {
                     </div>
                     <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                       Username: <code style={{ background: "var(--accent-bg)", padding: "0.1rem 0.3rem", borderRadius: "0.25rem" }}>{acct.username}</code>
-                      &nbsp;Â· Label: <code style={{ background: "var(--accent-bg)", padding: "0.1rem 0.3rem", borderRadius: "0.25rem" }}>{acct.collaborator_label}</code>
+                      &nbsp;| Label: <code style={{ background: "var(--accent-bg)", padding: "0.1rem 0.3rem", borderRadius: "0.25rem" }}>{acct.collaborator_label}</code>
                     </p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs" style={{ color: "var(--text-muted)" }}>Password: </span>
@@ -418,8 +418,8 @@ export default function AdminPage() {
                     </div>
                     <p className="text-xs mb-1" style={{ color: "var(--text-muted)" }}>
                       <a href={`mailto:${msg.email}`} style={{ color: "var(--accent)" }}>{msg.email}</a>
-                      {msg.subject && ` Â· Subject: ${msg.subject}`}
-                      {" Â· "}{new Date(msg.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
+                      {msg.subject && ` | Subject: ${msg.subject}`}
+                      {" | "}{new Date(msg.created_at).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })}
                     </p>
                     <p className="text-sm mt-2" style={{ color: "var(--text-body)", whiteSpace: "pre-wrap" }}>{msg.message}</p>
                   </div>

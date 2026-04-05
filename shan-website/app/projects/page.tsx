@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Lock, Folder, Plus, Edit2, Trash2, X, Check, ExternalLink, Upload, AlertTriangle, Info } from "lucide-react";
 import { useAdmin } from "@/app/lib/AdminContext";
 import { supabase } from "@/app/lib/supabase";
-import type { Project, DocAttachment } from "@/app/lib/supabase";
+import type { Project, DocAttachment, GuestAccount } from "@/app/lib/supabase";
 import Link from "next/link";
 
 const EMPTY_FORM: Omit<Project, "id" | "created_at"> = {
@@ -22,11 +22,11 @@ export default function ProjectsPage() {
   const [tagInput, setTagInput] = useState("");
   const [labelInput, setLabelInput] = useState("");
   const [newDoc, setNewDoc] = useState({ name: "", url: "" });
-  const [showDocForm, setShowDocForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploadProjectId, setUploadProjectId] = useState<string | null>(null);
   const [guestUploadName, setGuestUploadName] = useState("");
   const [guestUploadFile, setGuestUploadFile] = useState<File | null>(null);
+  const [guestAccounts, setGuestAccounts] = useState<GuestAccount[]>([]);
 
   useEffect(() => {
     supabase
@@ -39,11 +39,22 @@ export default function ProjectsPage() {
       });
   }, []);
 
+  useEffect(() => {
+    if (!isAdmin) return;
+    supabase
+      .from("guest_accounts")
+      .select("*")
+      .eq("active", true)
+      .then(({ data }) => {
+        if (data) setGuestAccounts(data as GuestAccount[]);
+      });
+  }, [isAdmin]);
+
   function handleAdd() {
     setForm({ ...EMPTY_FORM, last_updated: new Date().toISOString().slice(0, 10) });
     setEditId(null);
     setShowForm(true);
-    setTagInput(""); setLabelInput(""); setShowDocForm(false);
+    setTagInput(""); setLabelInput(""); setNewDoc({ name: "", url: "" });
   }
 
   function handleEdit(proj: Project) {
@@ -51,7 +62,7 @@ export default function ProjectsPage() {
     setForm(rest);
     setEditId(id);
     setShowForm(true);
-    setTagInput(""); setLabelInput(""); setShowDocForm(false);
+    setTagInput(""); setLabelInput(""); setNewDoc({ name: "", url: "" });
   }
 
   async function handleDelete(id: string) {
@@ -77,7 +88,6 @@ export default function ProjectsPage() {
     const doc: DocAttachment = { ...newDoc, id: `doc_${Date.now()}` };
     setForm((f) => ({ ...f, documents: [...(f.documents || []), doc] }));
     setNewDoc({ name: "", url: "" });
-    setShowDocForm(false);
   }
 
   function removeDocument(docId: string) {
@@ -105,10 +115,19 @@ export default function ProjectsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+
+    // Auto-confirm any pending document entry
+    let finalForm = { ...form };
+    if (newDoc.name.trim() && newDoc.url.trim()) {
+      const doc: DocAttachment = { name: newDoc.name.trim(), url: newDoc.url.trim(), id: `doc_${Date.now()}` };
+      finalForm = { ...finalForm, documents: [...(finalForm.documents || []), doc] };
+      setNewDoc({ name: "", url: "" });
+    }
+
     if (editId) {
       const { data, error } = await supabase
         .from("projects")
-        .update({ ...form, updated_at: new Date().toISOString() })
+        .update({ ...finalForm, updated_at: new Date().toISOString() })
         .eq("id", editId)
         .select()
         .single();
@@ -118,7 +137,7 @@ export default function ProjectsPage() {
     } else {
       const { data, error } = await supabase
         .from("projects")
-        .insert({ ...form })
+        .insert({ ...finalForm })
         .select()
         .single();
       if (!error && data) {
@@ -169,7 +188,7 @@ export default function ProjectsPage() {
     );
   }
 
-  if (loading) return <div className="text-sm" style={{ color: "var(--text-muted)" }}>Loading…</div>;
+  if (loading) return <div className="text-sm" style={{ color: "var(--text-muted)" }}>Loading&hellip;</div>;
 
   return (
     <div style={{ maxWidth: "860px" }}>
@@ -257,7 +276,7 @@ export default function ProjectsPage() {
               </div>
             </div>
 
-            {/* Collaborator labels */}
+            {/* Collaborator labels — dropdown of existing guest accounts */}
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>
                 Collaborator Labels (guests with these labels can see this project)
@@ -274,10 +293,21 @@ export default function ProjectsPage() {
                 ))}
               </div>
               <div className="flex gap-2">
-                <input value={labelInput} onChange={(e) => setLabelInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addLabel())}
-                  placeholder="Add label, press Enter" className="rounded-lg px-2 py-1 text-xs flex-1"
-                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+                <select
+                  value={labelInput}
+                  onChange={(e) => setLabelInput(e.target.value)}
+                  className="rounded-lg px-2 py-1 text-xs flex-1"
+                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}
+                >
+                  <option value="">-- Select a guest account --</option>
+                  {guestAccounts
+                    .filter((g) => !form.collaborator_labels.includes(g.collaborator_label))
+                    .map((g) => (
+                      <option key={g.id} value={g.collaborator_label}>
+                        {g.display_name || g.username} ({g.collaborator_label})
+                      </option>
+                    ))}
+                </select>
                 <button type="button" onClick={addLabel} className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.5rem" }}>+</button>
               </div>
             </div>
@@ -300,14 +330,11 @@ export default function ProjectsPage() {
                 style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
             </div>
 
-            {/* Documents */}
+            {/* Documents — always visible, auto-confirmed on submit */}
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-medium" style={{ color: "var(--text-heading)" }}>Documents (GitHub URL or direct link)</label>
-                <button type="button" onClick={() => setShowDocForm(!showDocForm)} className="btn btn-outline text-xs" style={{ padding: "0.15rem 0.5rem" }}>
-                  <Plus size={11} /> Add
-                </button>
-              </div>
+              <label className="text-xs font-medium mb-2 block" style={{ color: "var(--text-heading)" }}>
+                Documents (GitHub URL or direct link)
+              </label>
               {(form.documents || []).map((doc) => (
                 <div key={doc.id} className="flex items-center gap-2 mb-1 p-2 rounded-lg" style={{ background: "var(--accent-bg)" }}>
                   <span className="text-xs flex-1 truncate" style={{ color: "var(--text-body)" }}>{doc.name}</span>
@@ -317,24 +344,26 @@ export default function ProjectsPage() {
                   </button>
                 </div>
               ))}
-              {showDocForm && (
-                <div className="flex gap-2 mt-2 flex-wrap">
-                  <input value={newDoc.name} onChange={(e) => setNewDoc({ ...newDoc, name: e.target.value })}
-                    placeholder="Document name" className="rounded-lg px-2 py-1 text-xs"
-                    style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", minWidth: "120px" }} />
-                  <input value={newDoc.url} onChange={(e) => setNewDoc({ ...newDoc, url: e.target.value })}
-                    placeholder="GitHub raw URL or https://..." className="rounded-lg px-2 py-1 text-xs flex-1"
-                    style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", minWidth: "160px" }} />
-                  <button type="button" onClick={addDocument} className="btn btn-primary text-xs" style={{ padding: "0.25rem 0.6rem" }}>
-                    <Check size={11} />
-                  </button>
-                </div>
-              )}
+              <div className="flex gap-2 mt-2 flex-wrap">
+                <input value={newDoc.name} onChange={(e) => setNewDoc({ ...newDoc, name: e.target.value })}
+                  placeholder="Document name" className="rounded-lg px-2 py-1 text-xs"
+                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", minWidth: "120px" }} />
+                <input value={newDoc.url} onChange={(e) => setNewDoc({ ...newDoc, url: e.target.value })}
+                  placeholder="GitHub raw URL or https://..." className="rounded-lg px-2 py-1 text-xs flex-1"
+                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", minWidth: "160px" }} />
+                <button type="button" onClick={addDocument} className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.6rem" }}
+                  title="Add document to list">
+                  <Check size={11} />
+                </button>
+              </div>
+              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                Fill in name and URL, then click &#x2713; to add. Any unconfirmed entry will be saved automatically.
+              </p>
             </div>
 
             <div className="flex gap-2 pt-2">
               <button type="submit" disabled={saving} className="btn btn-primary text-sm">
-                <Check size={14} /> {saving ? "Saving…" : editId ? "Save Changes" : "Add Project"}
+                <Check size={14} /> {saving ? "Saving..." : editId ? "Save Changes" : "Add Project"}
               </button>
               <button type="button" onClick={() => setShowForm(false)} className="btn btn-outline text-sm">Cancel</button>
             </div>

@@ -8,6 +8,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://shanjiang.com"),
   title: "Shan Jiang | Health Economist",
   description:
     "Personal academic website of Shan Jiang — PhD Candidate at MUCHE, Macquarie University. Research in distributional cost-effectiveness analysis, health equity, and advanced health economic modelling.",
@@ -34,6 +35,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        <meta charSet="utf-8" />
+      </head>
       <body>
         <AdminProvider>
           <div className="page-wrapper">
