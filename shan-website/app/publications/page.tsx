@@ -1,37 +1,22 @@
 "use client";
 import { useState, useEffect } from "react";
-import { ExternalLink, Download, BookOpen, Plus, Edit2, Trash2, X, Check } from "lucide-react";
+import { ExternalLink, Download, Plus, Edit2, Trash2, X, Check } from "lucide-react";
 import { useAdmin } from "@/app/lib/AdminContext";
-import defaultPubs from "@/data/publications.json";
+import { supabase } from "@/app/lib/supabase";
+import type { Publication } from "@/app/lib/supabase";
 
-type Pub = {
-  id: string;
-  title: string;
-  authors: string;
-  journal: string;
-  year: number;
-  volume?: string;
-  pages?: string;
-  doi?: string;
-  url?: string;
-  pdf?: string;
-  tags: string[];
-  featured?: boolean;
-  type?: string;
-  citedBy?: number;
-};
-
-const EMPTY_FORM: Omit<Pub, "id"> = {
+const EMPTY_FORM: Omit<Publication, "id" | "sort_order"> = {
   title: "", authors: "", journal: "", year: new Date().getFullYear(),
   volume: "", pages: "", doi: "", url: "", pdf: "",
-  tags: [], featured: false, type: "journal", citedBy: 0,
+  tags: [], featured: false, pub_type: "journal", status: "published",
 };
 
-function groupByYear(pubs: Pub[]) {
-  const map: Record<number, Pub[]> = {};
+function groupByYear(pubs: Publication[]) {
+  const map: Record<number, Publication[]> = {};
   for (const p of pubs) {
-    if (!map[p.year]) map[p.year] = [];
-    map[p.year].push(p);
+    const y = p.year ?? 0;
+    if (!map[y]) map[y] = [];
+    map[y].push(p);
   }
   return Object.entries(map)
     .sort(([a], [b]) => Number(b) - Number(a))
@@ -40,31 +25,26 @@ function groupByYear(pubs: Pub[]) {
 
 export default function PublicationsPage() {
   const { isAdmin } = useAdmin();
-  const [pubs, setPubs] = useState<Pub[]>([]);
+  const [pubs, setPubs] = useState<Publication[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [form, setForm] = useState<Omit<Pub, "id">>(EMPTY_FORM);
+  const [form, setForm] = useState<Omit<Publication, "id" | "sort_order">>(EMPTY_FORM);
   const [tagInput, setTagInput] = useState("");
   const [search, setSearch] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("sj_publications");
-      if (stored) {
-        setPubs(JSON.parse(stored));
-      } else {
-        // Seed from publications.json on first load
-        setPubs(defaultPubs as Pub[]);
-      }
-    } catch {
-      setPubs(defaultPubs as Pub[]);
-    }
+    supabase
+      .from("publications")
+      .select("*")
+      .order("year", { ascending: false })
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        if (data) setPubs(data as Publication[]);
+        setLoading(false);
+      });
   }, []);
-
-  function savePubs(updated: Pub[]) {
-    setPubs(updated);
-    localStorage.setItem("sj_publications", JSON.stringify(updated));
-  }
 
   function handleAdd() {
     setForm({ ...EMPTY_FORM, year: new Date().getFullYear() });
@@ -73,16 +53,18 @@ export default function PublicationsPage() {
     setShowForm(true);
   }
 
-  function handleEdit(pub: Pub) {
-    const { id, ...rest } = pub;
+  function handleEdit(pub: Publication) {
+    const { id, sort_order, ...rest } = pub;
     setForm(rest);
     setEditId(id);
     setTagInput("");
     setShowForm(true);
   }
 
-  function handleDelete(id: string) {
-    if (confirm("Delete this publication?")) savePubs(pubs.filter((p) => p.id !== id));
+  async function handleDelete(id: string) {
+    if (!confirm("Delete this publication?")) return;
+    await supabase.from("publications").delete().eq("id", id);
+    setPubs((p) => p.filter((x) => x.id !== id));
   }
 
   function addTag() {
@@ -91,14 +73,31 @@ export default function PublicationsPage() {
     setTagInput("");
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSaving(true);
     if (editId) {
-      savePubs(pubs.map((p) => (p.id === editId ? { ...form, id: editId } : p)));
+      const { data, error } = await supabase
+        .from("publications")
+        .update({ ...form })
+        .eq("id", editId)
+        .select()
+        .single();
+      if (!error && data) {
+        setPubs((p) => p.map((x) => (x.id === editId ? (data as Publication) : x)));
+      }
     } else {
-      const newId = `pub_${Date.now()}`;
-      savePubs([...pubs, { ...form, id: newId }]);
+      const maxOrder = pubs.reduce((m, p) => Math.max(m, p.sort_order), -1);
+      const { data, error } = await supabase
+        .from("publications")
+        .insert({ ...form, sort_order: maxOrder + 1 })
+        .select()
+        .single();
+      if (!error && data) {
+        setPubs((p) => [...p, data as Publication]);
+      }
     }
+    setSaving(false);
     setShowForm(false);
     setEditId(null);
   }
@@ -106,13 +105,15 @@ export default function PublicationsPage() {
   const filtered = search
     ? pubs.filter((p) =>
         p.title.toLowerCase().includes(search.toLowerCase()) ||
-        p.authors.toLowerCase().includes(search.toLowerCase()) ||
-        p.journal.toLowerCase().includes(search.toLowerCase()) ||
+        (p.authors || "").toLowerCase().includes(search.toLowerCase()) ||
+        (p.journal || "").toLowerCase().includes(search.toLowerCase()) ||
         p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
       )
     : pubs;
 
   const grouped = groupByYear(filtered);
+
+  if (loading) return <div className="text-sm" style={{ color: "var(--text-muted)" }}>Loading…</div>;
 
   return (
     <div style={{ maxWidth: "860px" }}>
@@ -161,22 +162,22 @@ export default function PublicationsPage() {
                 style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Authors *</label>
-              <input required value={form.authors} onChange={(e) => setForm({ ...form, authors: e.target.value })}
+              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Authors</label>
+              <input value={form.authors || ""} onChange={(e) => setForm({ ...form, authors: e.target.value })}
                 className="w-full rounded-lg px-3 py-2 text-sm"
                 style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}
                 placeholder="Last FM, Jiang S, et al." />
             </div>
             <div className="grid sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Journal *</label>
-                <input required value={form.journal} onChange={(e) => setForm({ ...form, journal: e.target.value })}
+                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Journal</label>
+                <input value={form.journal || ""} onChange={(e) => setForm({ ...form, journal: e.target.value })}
                   className="w-full rounded-lg px-3 py-2 text-sm"
                   style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Year *</label>
-                <input required type="number" value={form.year} onChange={(e) => setForm({ ...form, year: Number(e.target.value) })}
+                <input required type="number" value={form.year || ""} onChange={(e) => setForm({ ...form, year: Number(e.target.value) })}
                   className="w-full rounded-lg px-3 py-2 text-sm"
                   style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
               </div>
@@ -212,6 +213,24 @@ export default function PublicationsPage() {
                   style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
               </div>
             </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Type</label>
+                <select value={form.pub_type} onChange={(e) => setForm({ ...form, pub_type: e.target.value })}
+                  className="w-full rounded-lg px-3 py-2 text-sm"
+                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}>
+                  {["journal", "conference", "book", "preprint"].map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Status</label>
+                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  className="w-full rounded-lg px-3 py-2 text-sm"
+                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}>
+                  {["published", "in_press", "preprint"].map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            </div>
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Tags</label>
               <div className="flex gap-2 mb-1 flex-wrap">
@@ -240,8 +259,8 @@ export default function PublicationsPage() {
               </label>
             </div>
             <div className="flex gap-2 pt-2">
-              <button type="submit" className="btn btn-primary text-sm">
-                <Check size={14} /> {editId ? "Save Changes" : "Add Publication"}
+              <button type="submit" disabled={saving} className="btn btn-primary text-sm">
+                <Check size={14} /> {saving ? "Saving…" : editId ? "Save Changes" : "Add Publication"}
               </button>
               <button type="button" onClick={() => setShowForm(false)} className="btn btn-outline text-sm">Cancel</button>
             </div>
@@ -250,12 +269,14 @@ export default function PublicationsPage() {
       )}
 
       {grouped.length === 0 && (
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>No publications found.</p>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          {isAdmin ? "No publications yet. Click 'Add Publication' to get started." : "No publications found."}
+        </p>
       )}
 
       {grouped.map(({ year, items }) => (
         <section key={year} className="mb-10">
-          <h2 className="section-title">{year}</h2>
+          <h2 className="section-title">{year || "Year unknown"}</h2>
           <div className="flex flex-col gap-4">
             {items.map((pub) => (
               <div key={pub.id} className="card">
@@ -264,13 +285,18 @@ export default function PublicationsPage() {
                     <p className="font-semibold text-sm leading-snug" style={{ color: "var(--text-heading)" }}>
                       {pub.title}
                     </p>
-                    <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{pub.authors}</p>
+                    {pub.authors && <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{pub.authors}</p>}
                     <p className="text-xs mt-1 italic" style={{ color: "var(--accent)" }}>
                       {pub.journal}
                       {pub.volume && `, ${pub.volume}`}
                       {pub.pages && `, ${pub.pages}`}
-                      {" · "}{pub.year}
+                      {pub.year && ` · ${pub.year}`}
                     </p>
+                    {pub.status !== "published" && (
+                      <span className="tag text-xs mt-1" style={{ background: "#FEF3C7", color: "#92400E" }}>
+                        {pub.status === "in_press" ? "In press" : "Preprint"}
+                      </span>
+                    )}
                     <div className="flex flex-wrap gap-2 mt-2">
                       {pub.tags.map((tag) => (
                         <span key={tag} className="tag">{tag}</span>
