@@ -8,6 +8,7 @@ import {
 import profile from "@/data/profile.json";
 import news from "@/data/news.json";
 import { useAdmin } from "@/app/lib/AdminContext";
+import { supabase } from "@/app/lib/supabase";
 
 const typeColor: Record<string, string> = {
   publication: "#5F8FA8",
@@ -133,32 +134,28 @@ export default function HomePage() {
     } catch {}
   }, []);
 
-  // Compute real-time stats
+  // Fetch real-time stats from Supabase
   useEffect(() => {
-    try {
-      const pubsRaw = localStorage.getItem("sj_publications");
-      const pubs = pubsRaw ? JSON.parse(pubsRaw) : [];
-      const projectsRaw = localStorage.getItem("sj_projects");
-      const projects = projectsRaw ? JSON.parse(projectsRaw) : [];
-      const activeProjects = projects.filter((p: { status: string }) => p.status === "active").length;
-      const awardsRaw = localStorage.getItem("sj_awards");
-      const awards = awardsRaw ? JSON.parse(awardsRaw) : [];
-      const activeGrants = awards.filter((a: { type: string; status: string }) =>
-        (a.type === "grant" || a.type === "fellowship") && a.status === "active"
-      ).length;
-      const teamRaw = localStorage.getItem("sj_team");
-      const team = teamRaw ? JSON.parse(teamRaw) : [];
-      const activeTeam = team.filter((m: { status: string }) => m.status === "active").length;
-      setStats({
-        publications: pubs.length || profile.stats.publications,
-        projects: activeProjects || profile.stats.workingProjects,
-        grants: activeGrants || profile.stats.activeGrants,
-        team: activeTeam || profile.stats.studentsSupervised,
-      });
-    } catch {}
+    async function fetchStats() {
+      try {
+        const [pubsRes, projectsRes, grantsRes] = await Promise.all([
+          supabase.from("publications").select("id", { count: "exact", head: true }),
+          supabase.from("projects").select("id", { count: "exact", head: true }).eq("status", "active"),
+          supabase.from("awards").select("id", { count: "exact", head: true }).eq("entry_type", "grant"),
+        ]);
+        setStats({
+          publications: pubsRes.count ?? 0,
+          projects: projectsRes.count ?? 0,
+          grants: grantsRes.count ?? 0,
+          team: 0,
+        });
+      } catch {}
+    }
+    fetchStats();
   }, []);
 
-  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {   const file = e.target.files?.[0];
+  async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
     if (!file) return;
     const cropped = await circleCropPhoto(file);
     setProfilePhoto(cropped);
@@ -185,7 +182,7 @@ export default function HomePage() {
 
   return (
     <div style={{ maxWidth: "820px" }}>
-      {/* ── Hero ──────────────────────────────────────────────────── */}
+      {/* ─── Hero ─────────────────────────────────────────────────────── */}
       <section className="flex flex-col sm:flex-row gap-8 items-start mb-12">
         <div className="flex-shrink-0 relative">
           {profilePhoto ? (
@@ -285,7 +282,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── At-a-glance stats ─────────────────────────────────────── */}
+      {/* ─── At-a-glance stats ──────────────────────────────────────── */}
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12">
         {[
           { icon: BookOpen, label: "Publications",  value: stats.publications, href: "/publications" },
@@ -304,7 +301,7 @@ export default function HomePage() {
         ))}
       </section>
 
-      {/* ── Recent news ───────────────────────────────────────────── */}
+      {/* ─── Recent news ──────────────────────────────────────────── */}
       <section className="mb-12">
         <h2 className="section-title">Latest News</h2>
         <div className="flex flex-col gap-3">
