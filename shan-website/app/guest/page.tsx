@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { UserCircle, LogIn, LogOut, Folder, ChevronRight } from "lucide-react";
 import { useAdmin } from "@/app/lib/AdminContext";
 import Link from "next/link";
@@ -9,11 +9,15 @@ export default function GuestPage() {
   const { isGuest, guestUser, guestLogin, guestLogout, isAdmin } = useAdmin();
   const [form, setForm] = useState({ username: "", password: "" });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    const ok = guestLogin(form.username, form.password);
+    setLoading(true);
+    setError("");
+    const ok = await guestLogin(form.username, form.password);
+    setLoading(false);
     if (ok) {
       router.push("/projects");
     } else {
@@ -27,7 +31,6 @@ export default function GuestPage() {
     setError("");
   }
 
-  // Already logged in as guest
   if (isGuest && guestUser) {
     return (
       <div style={{ maxWidth: "480px" }}>
@@ -37,7 +40,7 @@ export default function GuestPage() {
           </div>
           <div>
             <h1 style={{ marginBottom: 0 }}>Guest Access</h1>
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Logged in as {guestUser.name}</p>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Logged in as {guestUser.display_name}</p>
           </div>
         </div>
 
@@ -45,9 +48,12 @@ export default function GuestPage() {
           <div className="flex items-center gap-3">
             <UserCircle size={18} style={{ color: "var(--accent)" }} />
             <div>
-              <p className="font-medium text-sm" style={{ color: "var(--text-heading)" }}>{guestUser.name}</p>
+              <p className="font-medium text-sm" style={{ color: "var(--text-heading)" }}>{guestUser.display_name}</p>
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                Collaborator label: <code style={{ background: "var(--bg-primary)", padding: "0.1rem 0.3rem", borderRadius: "0.25rem" }}>{guestUser.collaboratorLabel}</code>
+                Collaborator label:{" "}
+                <code style={{ background: "var(--bg-primary)", padding: "0.1rem 0.3rem", borderRadius: "0.25rem" }}>
+                  {guestUser.collaborator_label}
+                </code>
               </p>
             </div>
           </div>
@@ -69,7 +75,6 @@ export default function GuestPage() {
     );
   }
 
-  // Admin already logged in
   if (isAdmin) {
     return (
       <div style={{ maxWidth: "420px" }}>
@@ -93,7 +98,6 @@ export default function GuestPage() {
     );
   }
 
-  // Login form
   return (
     <div style={{ maxWidth: "420px" }}>
       <div className="flex items-center gap-3 mb-6">
@@ -123,12 +127,12 @@ export default function GuestPage() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               className="w-full rounded-lg px-3 py-2 text-sm"
               style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}
-              placeholder="••••••••"
+              placeholder="········"
             />
-      2   </div>
+          </div>
           {error && <p className="text-xs" style={{ color: "#E53E3E" }}>{error}</p>}
-          <button type="submit" className="btn btn-primary">
-            <LogIn size={15} /> Sign In
+          <button type="submit" disabled={loading} className="btn btn-primary">
+            <LogIn size={15} /> {loading ? "Signing in…" : "Sign In"}
           </button>
         </form>
         <p className="text-xs mt-4 text-center" style={{ color: "var(--text-muted)" }}>
