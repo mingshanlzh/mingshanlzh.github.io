@@ -1,28 +1,83 @@
 import { createClient } from "@supabase/supabase-js";
 
-// These env vars must be set in .env.local (never commit the service role key)
 const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? "";
 const supabaseAnon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 export const supabase = createClient(supabaseUrl, supabaseAnon);
 
-// Type helpers for common Supabase operations
+// ─── Shared types ─────────────────────────────────────────────────────────────
+
+export type GuestAccount = {
+  id: string;
+  username: string;
+  password: string;
+  display_name: string;
+  collaborator_label: string;
+  active: boolean;
+};
+
+export type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  guest_username?: string;
+  read: boolean;
+  created_at: string;
+};
+
+export type Award = {
+  id: string;
+  entry_type: "award" | "grant";
+  title: string;
+  organisation?: string;
+  year?: number;
+  funder?: string;
+  amount?: string;
+  period?: string;
+  role?: string;
+  link?: string;
+  sort_order: number;
+};
+
+export type DocAttachment = {
+  id: string;
+  name: string;
+  url: string;
+};
+
 export type Project = {
   id: string;
   title: string;
   description: string;
-  milestone: number;
+  summary?: string;
+  status: "active" | "completed" | "paused";
   tags: string[];
-  last_updated: string;
+  collaborator_labels: string[];
+  notice?: string;
+  notice_type?: "info" | "warning" | "success";
+  documents: DocAttachment[];
+  last_updated?: string;
+  created_at?: string;
 };
 
-export type Upload = {
+export type Publication = {
   id: string;
-  project_id: string;
-  filename: string;
-  storage_path: string;
-  note: string;
-  created_at: string;
+  title: string;
+  authors: string;
+  journal?: string;
+  year?: number;
+  volume?: string;
+  pages?: string;
+  doi?: string;
+  url?: string;
+  pdf?: string;
+  tags: string[];
+  featured: boolean;
+  pub_type: string;
+  status: string;
+  sort_order: number;
 };
 
 export type NewsItem = {
