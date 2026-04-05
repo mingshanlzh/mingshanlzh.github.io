@@ -12,16 +12,247 @@ const EMPTY_FORM: Omit<Project, "id" | "created_at"> = {
   notice: "", notice_type: "info", documents: [],
 };
 
+function ProjectForm({
+  form, setForm, editId, saving, tagInput, setTagInput,
+  labelInput, setLabelInput, guestAccounts,
+  onSubmit, onCancel,
+}: {
+  form: Omit<Project, "id" | "created_at">;
+  setForm: React.Dispatch<React.SetStateAction<Omit<Project, "id" | "created_at">>>;
+  editId: string | null;
+  saving: boolean;
+  tagInput: string;
+  setTagInput: React.Dispatch<React.SetStateAction<string>>;
+  labelInput: string;
+  setLabelInput: React.Dispatch<React.SetStateAction<string>>;
+  guestAccounts: GuestAccount[];
+  onSubmit: (e: React.FormEvent) => void;
+  onCancel: () => void;
+}) {
+  const [newDocName, setNewDocName] = useState("");
+  const [newDocUrl, setNewDocUrl] = useState("");
+
+  function addTag() {
+    const t = tagInput.trim();
+    if (t && !form.tags.includes(t)) setForm((f) => ({ ...f, tags: [...f.tags, t] }));
+    setTagInput("");
+  }
+
+  function addLabel() {
+    const l = labelInput.trim();
+    if (l && !form.collaborator_labels.includes(l)) setForm((f) => ({ ...f, collaborator_labels: [...f.collaborator_labels, l] }));
+    setLabelInput("");
+  }
+
+  function addDocument() {
+    if (!newDocName.trim() || !newDocUrl.trim()) return;
+    const doc: DocAttachment = { id: `doc_${Date.now()}`, name: newDocName.trim(), url: newDocUrl.trim() };
+    setForm((f) => ({ ...f, documents: [...(f.documents || []), doc] }));
+    setNewDocName("");
+    setNewDocUrl("");
+  }
+
+  function removeDocument(docId: string) {
+    setForm((f) => ({ ...f, documents: (f.documents || []).filter((d) => d.id !== docId) }));
+  }
+
+  function handleSubmitWithPendingDoc(e: React.FormEvent) {
+    // Auto-confirm any pending doc entry before submit
+    if (newDocName.trim() && newDocUrl.trim()) {
+      const doc: DocAttachment = { id: `doc_${Date.now()}`, name: newDocName.trim(), url: newDocUrl.trim() };
+      setForm((f) => ({ ...f, documents: [...(f.documents || []), doc] }));
+      setNewDocName("");
+      setNewDocUrl("");
+    }
+    onSubmit(e);
+  }
+
+  return (
+    <div className="card mb-4" style={{ border: "1.5px solid var(--accent)" }}>
+      <div className="flex items-center justify-between mb-4">
+        <h2 style={{ marginBottom: 0, fontSize: "1rem" }}>{editId ? "Edit Project" : "New Project"}</h2>
+        <button onClick={onCancel} style={{ background: "none", border: "none", cursor: "pointer" }}>
+          <X size={18} style={{ color: "var(--text-muted)" }} />
+        </button>
+      </div>
+      <form onSubmit={handleSubmitWithPendingDoc} className="flex flex-col gap-3">
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Title *</label>
+          <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
+            className="w-full rounded-lg px-3 py-2 text-sm"
+            style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Description *</label>
+          <textarea required rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
+            className="w-full rounded-lg px-3 py-2 text-sm"
+            style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", resize: "vertical" }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Summary (optional, visible to guests)</label>
+          <textarea rows={2} value={form.summary || ""} onChange={(e) => setForm({ ...form, summary: e.target.value })}
+            className="w-full rounded-lg px-3 py-2 text-sm"
+            style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primar"y)", resize: "vertical" }} />
+        </div>
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Status</label>
+            <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as Project["status"] })}
+              className="w-full rounded-lg px-3 py-2 text-sm"
+              style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}>
+              {["active", "completed", "paused"].map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Last Updated</label>
+            <input type="date" value={form.last_updated || ""} onChange={(e) => setForm({ ...form, last_updated: e.target.value })}
+              className="w-full rounded-lg px-3 py-2 text-sm"
+              style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+          </div>
+        </div>
+
+        {/* Tags */}
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Tags</label>
+          <div className="flex gap-2 mb-1 flex-wrap">
+            {form.tags.map((t) => (
+              <span key={t} className="tag flex items-center gap-1">
+                {t}
+                <button type="button" onClick={() => setForm((f) => ({ ...f, tags: f.tags.filter((x) => x !== t) }))}
+                  style={{ background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>
+                  <X size={10} />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <input value={tagInput} onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
+              placeholder="Add tag, press Enter" className="rounded-lg px-2 py-1 text-xs flex-1"
+              style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+            <button type="button" onClick={addTag} className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.5rem" }}>+</button>
+          </div>
+        </div>
+
+        {/* Collaborator labels */}
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>
+            Collaborator Labels (guests with these labels can see this project)
+          </label>
+          <div className="flex gap-2 mb-1 flex-wrap">
+            {form.collaborator_labels.map((l) => (
+              <span key={l} className="tag flex items-center gap-1" style={{ background: "var(--accent)", color: "white" }}>
+                {l}
+                <button type="button" onClick={() => setForm((f) => ({ ...f, collaborator_labels: f.collaborator_labels.filter((x) => x !== l) }))}
+                  style={{ background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>
+                  <X size={10} />
+                </button>
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <select value={labelInput} onChange={(e) => setLabelInput(e.target.value)}
+              className="rounded-lg px-2 py-1 text-xs flex-1"
+              style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}>
+              <option value="">-- Select a guest account --</option>
+              {guestAccounts
+                .filter((g) => !form.collaborator_labels.includes(g.collaborator_label))
+                .map((g) => (
+                  <option key={g.id} value={g.collaborator_label}>
+                    {g.display_name || g.username} ({g.collaborator_label})
+                  </option>
+                ))}
+            </select>
+            <button type="button" onClick={addLabel} className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.5rem" }}>+</button>
+          </div>
+        </div>
+
+        {/* Notice */}
+        <div>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Notice / Status Box (optional)</label>
+          <div className="flex gap-2 mb-2">
+            {(["info", "warning", "success"] as const).map((t) => (
+              <label key={t} className="flex items-center gap-1 text-xs cursor-pointer" style={{ color: "var(--text-body)" }}>
+                <input type="radio" name="noticeType" value={t} checked={form.notice_type === t}
+                  onChange={() => setForm({ ...form, notice_type: t })} />
+                {t}
+              </label>
+            ))}
+          </div>
+          <input value={form.notice || ""} onChange={(e) => setForm({ ...form, notice: e.target.value })}
+            placeholder="e.g. Analysis phase: please review the attached script by Friday"
+            className="w-full rounded-lg px-3 py-2 text-sm"
+            style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+        </div>
+
+        {/* Documents — multiple attachments */}
+        <div>
+          <label className="text-xs font-medium mb-1 block" style={{ color: "var(--text-heading)" }}>
+            Documents (add as many as needed)
+          </label>
+
+          {/* Existing document list */}
+          {(form.documents || []).length > 0 && (
+            <div className="flex flex-col gap-1 mb-2">
+              {(form.documents || []).map((doc) => (
+                <div key={doc.id} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: "var(--accent-bg)" }}>
+                  <span className="text-xs font-medium flex-shrink-0" style={{ color: "var(--text-body)", minWidth: "100px" }}>{doc.name}</span>
+                  <span className="text-xs truncate flex-1" style={{ color: "var(--text-muted)" }}>{doc.url}</span>
+                  <button type="button" onClick={() => removeDocument(doc.id)}
+                    style={{ background: "none", border: "none", cursor: "pointer", flexShrink: 0 }}>
+                    <X size={13} style={{ color: "var(--text-muted)" }} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* New document entry row */}
+          <div className="flex gap-2 flex-wrap items-end">
+            <div className="flex flex-col gap-1" style={{ minWidth: "130px" }}>
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>Document name</span>
+              <input value={newDocName} onChange={(e) => setNewDocName(e.target.value)}
+                placeholder="e.g. Analysis script"
+                className="rounded-lg px-2 py-1.5 text-xs"
+                style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+            </div>
+            <div className="flex flex-col gap-1 flex-1" style={{ minWidth: "160px" }}>
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>URL</span>
+              <input value={newDocUrl} onChange={(e) => setNewDocUrl(e.target.value)}
+                placeholder="https://github.com/... or direct link"
+                className="rounded-lg px-2 py-1.5 text-xs w-full"
+                style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+            </div>
+            <button type="button" onClick={addDocument}
+              className="btn btn-outline text-xs" style={{ padding: "0.4rem 0.7rem", alignSelf: "flex-end" }}>
+              <Plus size={11} /> Add document
+            </button>
+          </div>
+          <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+            Fill in name and URL, then click &ldquo;Add document&rdquo;. Repeat for each file.
+          </p>
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <button type="submit" disabled={saving} className="btn btn-primary text-sm">
+            <Check size={14} /> {saving ? "Saving…" : editId ? "Save Changes" : "Add Project"}
+          </button>
+          <button type="button" onClick={onCancel} className="btn btn-outline text-sm">Cancel</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 export default function ProjectsPage() {
   const { isAdmin, isGuest, guestUser } = useAdmin();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<Omit<Project, "id" | "created_at">>(EMPTY_FORM);
   const [tagInput, setTagInput] = useState("");
   const [labelInput, setLabelInput] = useState("");
-  const [newDoc, setNewDoc] = useState({ name: "", url: "" });
   const [saving, setSaving] = useState(false);
   const [uploadProjectId, setUploadProjectId] = useState<string | null>(null);
   const [guestUploadName, setGuestUploadName] = useState("");
@@ -53,16 +284,16 @@ export default function ProjectsPage() {
   function handleAdd() {
     setForm({ ...EMPTY_FORM, last_updated: new Date().toISOString().slice(0, 10) });
     setEditId(null);
-    setShowForm(true);
-    setTagInput(""); setLabelInput(""); setNewDoc({ name: "", url: "" });
+    setShowAddForm(true);
+    setTagInput(""); setLabelInput("");
   }
 
   function handleEdit(proj: Project) {
     const { id, created_at, ...rest } = proj;
     setForm(rest);
     setEditId(id);
-    setShowForm(true);
-    setTagInput(""); setLabelInput(""); setNewDoc({ name: "", url: "" });
+    setShowAddForm(false);
+    setTagInput(""); setLabelInput("");
   }
 
   async function handleDelete(id: string) {
@@ -71,32 +302,8 @@ export default function ProjectsPage() {
     setProjects((p) => p.filter((x) => x.id !== id));
   }
 
-  function addTag() {
-    const t = tagInput.trim();
-    if (t && !form.tags.includes(t)) setForm((f) => ({ ...f, tags: [...f.tags, t] }));
-    setTagInput("");
-  }
-
-  function addLabel() {
-    const l = labelInput.trim();
-    if (l && !form.collaborator_labels.includes(l)) setForm((f) => ({ ...f, collaborator_labels: [...f.collaborator_labels, l] }));
-    setLabelInput("");
-  }
-
-  function addDocument() {
-    if (!newDoc.name || !newDoc.url) return;
-    const doc: DocAttachment = { ...newDoc, id: `doc_${Date.now()}` };
-    setForm((f) => ({ ...f, documents: [...(f.documents || []), doc] }));
-    setNewDoc({ name: "", url: "" });
-  }
-
-  function removeDocument(docId: string) {
-    setForm((f) => ({ ...f, documents: (f.documents || []).filter((d) => d.id !== docId) }));
-  }
-
   async function handleGuestUpload(projId: string) {
     if (!guestUploadFile || !guestUploadName) return;
-    // Upload file to Supabase Storage bucket "uploads"
     const ext = guestUploadFile.name.split(".").pop();
     const path = `${projId}/${Date.now()}_${guestUploadName}.${ext}`;
     const { error: uploadError } = await supabase.storage
@@ -115,38 +322,29 @@ export default function ProjectsPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-
-    // Auto-confirm any pending document entry
-    let finalForm = { ...form };
-    if (newDoc.name.trim() && newDoc.url.trim()) {
-      const doc: DocAttachment = { name: newDoc.name.trim(), url: newDoc.url.trim(), id: `doc_${Date.now()}` };
-      finalForm = { ...finalForm, documents: [...(finalForm.documents || []), doc] };
-      setNewDoc({ name: "", url: "" });
-    }
-
     if (editId) {
       const { data, error } = await supabase
         .from("projects")
-        .update({ ...finalForm, updated_at: new Date().toISOString() })
+        .update({ ...form, updated_at: new Date().toISOString() })
         .eq("id", editId)
         .select()
         .single();
       if (!error && data) {
         setProjects((p) => p.map((x) => (x.id === editId ? (data as Project) : x)));
       }
+      setEditId(null);
     } else {
       const { data, error } = await supabase
         .from("projects")
-        .insert({ ...finalForm })
+        .insert({ ...form })
         .select()
         .single();
       if (!error && data) {
         setProjects((p) => [data as Project, ...p]);
       }
+      setShowAddForm(false);
     }
     setSaving(false);
-    setShowForm(false);
-    setEditId(null);
   }
 
   // Filter projects based on role
@@ -188,7 +386,13 @@ export default function ProjectsPage() {
     );
   }
 
-  if (loading) return <div className="text-sm" style={{ color: "var(--text-muted)" }}>Loading&hellip;</div>;
+  if (loading) return <div className="text-sm" style={{ color: "var(--text-muted)" }}>Loading…</div>;
+
+  const noticeColors: Record<string, { bg: string; border: string; icon: string }> = {
+    info:    { bg: "#EFF6FF", border: "#93C5FD", icon: "#3B82F6" },
+    warning: { bg: "#FFF8E1", border: "#F6AD55", icon: "#D97706" },
+    success: { bg: "#F0FFF4", border: "#68D391", icon: "#38A169" },
+  };
 
   return (
     <div style={{ maxWidth: "860px" }}>
@@ -208,170 +412,24 @@ export default function ProjectsPage() {
         )}
       </div>
 
-      {/* Admin add/edit form */}
-      {showForm && isAdmin && (
-        <div className="card mb-8" style={{ border: "1.5px solid var(--accent)" }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 style={{ marginBottom: 0, fontSize: "1rem" }}>{editId ? "Edit Project" : "New Project"}</h2>
-            <button onClick={() => setShowForm(false)} style={{ background: "none", border: "none", cursor: "pointer" }}>
-              <X size={18} style={{ color: "var(--text-muted)" }} />
-            </button>
-          </div>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Title *</label>
-              <input required value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
-                className="w-full rounded-lg px-3 py-2 text-sm"
-                style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Description *</label>
-              <textarea required rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
-                className="w-full rounded-lg px-3 py-2 text-sm"
-                style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", resize: "vertical" }} />
-            </div>
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Summary (optional, visible to guests)</label>
-              <textarea rows={2} value={form.summary || ""} onChange={(e) => setForm({ ...form, summary: e.target.value })}
-                className="w-full rounded-lg px-3 py-2 text-sm"
-                style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", resize: "vertical" }} />
-            </div>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Status</label>
-                <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as Project["status"] })}
-                  className="w-full rounded-lg px-3 py-2 text-sm"
-                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}>
-                  {["active", "completed", "paused"].map((s) => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Last Updated</label>
-                <input type="date" value={form.last_updated || ""} onChange={(e) => setForm({ ...form, last_updated: e.target.value })}
-                  className="w-full rounded-lg px-3 py-2 text-sm"
-                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
-              </div>
-            </div>
-
-            {/* Tags */}
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Tags</label>
-              <div className="flex gap-2 mb-1 flex-wrap">
-                {form.tags.map((t) => (
-                  <span key={t} className="tag flex items-center gap-1">
-                    {t}
-                    <button type="button" onClick={() => setForm((f) => ({ ...f, tags: f.tags.filter((x) => x !== t) }))}
-                      style={{ background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>
-                      <X size={10} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <input value={tagInput} onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                  placeholder="Add tag, press Enter" className="rounded-lg px-2 py-1 text-xs flex-1"
-                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
-                <button type="button" onClick={addTag} className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.5rem" }}>+</button>
-              </div>
-            </div>
-
-            {/* Collaborator labels — dropdown of existing guest accounts */}
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>
-                Collaborator Labels (guests with these labels can see this project)
-              </label>
-              <div className="flex gap-2 mb-1 flex-wrap">
-                {form.collaborator_labels.map((l) => (
-                  <span key={l} className="tag flex items-center gap-1" style={{ background: "var(--accent)", color: "white" }}>
-                    {l}
-                    <button type="button" onClick={() => setForm((f) => ({ ...f, collaborator_labels: f.collaborator_labels.filter((x) => x !== l) }))}
-                      style={{ background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>
-                      <X size={10} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <select
-                  value={labelInput}
-                  onChange={(e) => setLabelInput(e.target.value)}
-                  className="rounded-lg px-2 py-1 text-xs flex-1"
-                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}
-                >
-                  <option value="">-- Select a guest account --</option>
-                  {guestAccounts
-                    .filter((g) => !form.collaborator_labels.includes(g.collaborator_label))
-                    .map((g) => (
-                      <option key={g.id} value={g.collaborator_label}>
-                        {g.display_name || g.username} ({g.collaborator_label})
-                      </option>
-                    ))}
-                </select>
-                <button type="button" onClick={addLabel} className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.5rem" }}>+</button>
-              </div>
-            </div>
-
-            {/* Notice */}
-            <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Notice / Status Box (optional)</label>
-              <div className="flex gap-2 mb-2">
-                {(["info", "warning", "success"] as const).map((t) => (
-                  <label key={t} className="flex items-center gap-1 text-xs cursor-pointer" style={{ color: "var(--text-body)" }}>
-                    <input type="radio" name="noticeType" value={t} checked={form.notice_type === t}
-                      onChange={() => setForm({ ...form, notice_type: t })} />
-                    {t}
-                  </label>
-                ))}
-              </div>
-              <input value={form.notice || ""} onChange={(e) => setForm({ ...form, notice: e.target.value })}
-                placeholder="e.g. Analysis phase: please review the attached script by Friday"
-                className="w-full rounded-lg px-3 py-2 text-sm"
-                style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
-            </div>
-
-            {/* Documents — always visible, auto-confirmed on submit */}
-            <div>
-              <label className="text-xs font-medium mb-2 block" style={{ color: "var(--text-heading)" }}>
-                Documents (GitHub URL or direct link)
-              </label>
-              {(form.documents || []).map((doc) => (
-                <div key={doc.id} className="flex items-center gap-2 mb-1 p-2 rounded-lg" style={{ background: "var(--accent-bg)" }}>
-                  <span className="text-xs flex-1 truncate" style={{ color: "var(--text-body)" }}>{doc.name}</span>
-                  <span className="text-xs truncate" style={{ color: "var(--text-muted)", maxWidth: "150px" }}>{doc.url}</span>
-                  <button type="button" onClick={() => removeDocument(doc.id)} style={{ background: "none", border: "none", cursor: "pointer" }}>
-                    <X size={13} style={{ color: "var(--text-muted)" }} />
-                  </button>
-                </div>
-              ))}
-              <div className="flex gap-2 mt-2 flex-wrap">
-                <input value={newDoc.name} onChange={(e) => setNewDoc({ ...newDoc, name: e.target.value })}
-                  placeholder="Document name" className="rounded-lg px-2 py-1 text-xs"
-                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", minWidth: "120px" }} />
-                <input value={newDoc.url} onChange={(e) => setNewDoc({ ...newDoc, url: e.target.value })}
-                  placeholder="GitHub raw URL or https://..." className="rounded-lg px-2 py-1 text-xs flex-1"
-                  style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", minWidth: "160px" }} />
-                <button type="button" onClick={addDocument} className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.6rem" }}
-                  title="Add document to list">
-                  <Check size={11} />
-                </button>
-              </div>
-              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                Fill in name and URL, then click &#x2713; to add. Any unconfirmed entry will be saved automatically.
-              </p>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <button type="submit" disabled={saving} className="btn btn-primary text-sm">
-                <Check size={14} /> {saving ? "Saving..." : editId ? "Save Changes" : "Add Project"}
-              </button>
-              <button type="button" onClick={() => setShowForm(false)} className="btn btn-outline text-sm">Cancel</button>
-            </div>
-          </form>
-        </div>
+      {/* Add form — shown at top only when adding new */}
+      {showAddForm && isAdmin && (
+        <ProjectForm
+          form={form}
+          setForm={setForm}
+          editId={null}
+          saving={saving}
+          tagInput={tagInput}
+          setTagInput={setTagInput}
+          labelInput={labelInput}
+          setLabelInput={setLabelInput}
+          guestAccounts={guestAccounts}
+          onSubmit={handleSubmit}
+          onCancel={() => setShowAddForm(false)}
+        />
       )}
 
-      {visibleProjects.length === 0 && !showForm && (
+      {visibleProjects.length === 0 && !showAddForm && (
         <div className="card" style={{ background: "var(--accent-bg)" }}>
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             {isAdmin ? "No projects yet. Click 'Add Project' to get started." : "No projects available for your account."}
@@ -381,12 +439,28 @@ export default function ProjectsPage() {
 
       <div className="flex flex-col gap-6">
         {visibleProjects.map((proj) => {
-          const noticeColors: Record<string, { bg: string; border: string; icon: string }> = {
-            info:    { bg: "#EFF6FF", border: "#93C5FD", icon: "#3B82F6" },
-            warning: { bg: "#FFF8E1", border: "#F6AD55", icon: "#D97706" },
-            success: { bg: "#F0FFF4", border: "#68D391", icon: "#38A169" },
-          };
           const nc = noticeColors[proj.notice_type || "info"];
+
+          // Inline edit form
+          if (isAdmin && editId === proj.id) {
+            return (
+              <div key={proj.id}>
+                <ProjectForm
+                  form={form}
+                  setForm={setForm}
+                  editId={editId}
+                  saving={saving}
+                  tagInput={tagInput}
+                  setTagInput={setTagInput}
+                  labelInput={labelInput}
+                  setLabelInput={setLabelInput}
+                  guestAccounts={guestAccounts}
+                  onSubmit={handleSubmit}
+                  onCancel={() => setEditId(null)}
+                />
+              </div>
+            );
+          }
 
           return (
             <div key={proj.id} className="card">
