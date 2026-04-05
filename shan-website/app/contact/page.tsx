@@ -1,15 +1,37 @@
 "use client";
 import { useState } from "react";
 import { Mail, CheckCircle2 } from "lucide-react";
+import { supabase } from "@/app/lib/supabase";
+import { useAdmin } from "@/app/lib/AdminContext";
 
 export default function ContactPage() {
+  const { guestUser } = useAdmin();
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // In production: POST to Supabase Edge Function or Formspree
-    setSent(true);
+    setSubmitting(true);
+    setError("");
+
+    const { error: dbError } = await supabase
+      .from("contact_messages")
+      .insert({
+        name:           form.name,
+        email:          form.email,
+        subject:        form.subject || null,
+        message:        form.message,
+        guest_username: guestUser?.username ?? null,
+      });
+
+    setSubmitting(false);
+    if (dbError) {
+      setError("Failed to send message. Please try again or email directly.");
+    } else {
+      setSent(true);
+    }
   }
 
   return (
@@ -25,9 +47,9 @@ export default function ContactPage() {
           ].map(({ id, label, type, placeholder }) => (
             <div key={id}>
               <label className="block text-sm font-medium mb-1" style={{ color: "var(--text-heading)" }}>
-                {label} <span style={{ color: "#E53E3E" }}>*</span>
+                {label}{id !== "subject" && <span style={{ color: "#E53E3E" }}> *</span>}
               </label>
-              <input required type={type} placeholder={placeholder}
+              <input required={id !== "subject"} type={type} placeholder={placeholder}
                 value={(form as Record<string, string>)[id]}
                 onChange={(e) => setForm({ ...form, [id]: e.target.value })}
                 className="w-full rounded-lg px-3 py-2 text-sm"
@@ -37,17 +59,18 @@ export default function ContactPage() {
           ))}
           <div>
             <label className="block text-sm font-medium mb-1" style={{ color: "var(--text-heading)" }}>
-              Message
+              Message <span style={{ color: "#E53E3E" }}>*</span>
             </label>
-            <textarea rows={5} placeholder="Your message…"
+            <textarea required rows={5} placeholder="Your message…"
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
               className="w-full rounded-lg px-3 py-2 text-sm"
               style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", resize: "vertical" }}
             />
           </div>
-          <button type="submit" className="btn btn-primary">
-            <Mail size={15} /> Send Message
+          {error && <p className="text-xs" style={{ color: "#E53E3E" }}>{error}</p>}
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            <Mail size={15} /> {submitting ? "Sending…" : "Send Message"}
           </button>
         </form>
       ) : (
