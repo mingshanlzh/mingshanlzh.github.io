@@ -129,7 +129,7 @@ export default function Sidebar() {
         <div className="mb-2">
           <div className="flex items-center gap-2 text-xs mb-1" style={{ color: "var(--text-on-dark)" }}>
             <UserCircle size={13} />
-            <span>{guestUser.name}</span>
+            <span>{guestUser.display_name}</span>
           </div>
           <button
             onClick={guestLogout}
@@ -164,7 +164,6 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* ── Desktop sidebar ── */}
       <aside
         className="fixed top-0 left-0 h-full z-40 hidden md:flex flex-col"
         style={{
@@ -180,7 +179,6 @@ export default function Sidebar() {
         </div>
       </aside>
 
-      {/* ── Mobile hamburger ── */}
       <button
         className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg"
         style={{ background: "var(--bg-sidebar)", color: "var(--text-on-dark)" }}
