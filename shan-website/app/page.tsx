@@ -3,12 +3,12 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   BookOpen, Folder, Trophy, Users, ArrowRight,
-  Edit2, Check, X, Upload, Camera
+  Edit2, Check, X, Camera
 } from "lucide-react";
 import profile from "@/data/profile.json";
-import news from "@/data/news.json";
 import { useAdmin } from "@/app/lib/AdminContext";
 import { supabase } from "@/app/lib/supabase";
+import type { NewsItem } from "@/app/lib/supabase";
 
 const typeColor: Record<string, string> = {
   publication: "#5F8FA8",
@@ -80,7 +80,8 @@ const SOCIAL_CONFIG = [
   { key: "linkedin",     label: "LinkedIn",     Icon: LinkedInIcon,     color: "#0077B5" },
 ];
 
-function circleCropPhoto(file: File): Promise<string> {
+/** Crop image to a square (centre crop), no circle clip. Returns a data URL. */
+function squareCropPhoto(file: File): Promise<string> {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -88,21 +89,23 @@ function circleCropPhoto(file: File): Promise<string> {
       img.onload = () => {
         const size = Math.min(img.width, img.height);
         const canvas = document.createElement("canvas");
-        canvas.width = 200; canvas.height = 200;
+        canvas.width = 300; canvas.height = 300;
         const ctx = canvas.getContext("2d")!;
-        ctx.beginPath();
-        ctx.arc(100, 100, 100, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
         const sx = (img.width - size) / 2;
         const sy = (img.height - size) / 2;
-        ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
-        resolve(canvas.toDataURL("image/png"));
+        ctx.drawImage(img, sx, sy, size, size, 0, 0, 300, 300);
+        resolve(canvas.toDataURL("image/jpeg", 0.9));
       };
       img.src = e.target?.result as string;
     };
     reader.readAsDataURL(file);
   });
+}
+
+// Parse default city/country from profile.location ("Sydney, Australia")
+function parseLocation(loc: string): [string, string] {
+  const parts = loc.split(",").map((s) => s.trim());
+  return [parts[0] ?? "", parts.slice(1).join(", ") ?? ""];
 }
 
 export default function HomePage() {
@@ -116,22 +119,79 @@ export default function HomePage() {
   const [linksDraft, setLinksDraft] = useState<Record<string, string>>({ ...profile.links, linkedin: "" });
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Real-time stats from localStorage
+  // Profile identity fields
+  const [defaultCity, defaultCountry] = parseLocation(profile.location);
+  const [position, setPosition] = useState(profile.title);
+  const [affiliation, setAffiliation] = useState(profile.institution);
+  const [locationCity, setLocationCity] = useState(defaultCity);
+  const [locationCountry, setLocationCountry] = useState(defaultCountry);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [profileDraft, setProfileDraft] = useState({
+    position: profile.title,
+    affiliation: profile.institution,
+    locationCity: defaultCity,
+    locationCountry: defaultCountry,
+  });
+
+  // News from Supabase
+  const [recentNews, setRecentNews] = useState<NewsItem[]>([]);
+
+  // Real-time stats from Supabase
   const [stats, setStats] = useState({ publications: 0, projects: 0, grants: 0, team: 0 });
 
   useEffect(() => {
+    // Load from localStorage
     try {
-      const photo = localStorage.getItem("sj_profile_photo");
-      if (photo) setProfilePhoto(photo);
       const savedIntro = localStorage.getItem("sj_intro");
       if (savedIntro) { setIntro(savedIntro); setIntroDraft(savedIntro); }
       const savedLinks = localStorage.getItem("sj_links");
       if (savedLinks) {
         const parsed = JSON.parse(savedLinks);
-        setLinks(parsed);
-        setLinksDraft(parsed);
+        setLinks(parsed); setLinksDraft(parsed);
       }
+      const savedPos = localStorage.getItem("sj_position");
+      const savedAff = localStorage.getItem("sj_affiliation");
+      const savedCity = localStorage.getItem("sj_location_city");
+      const savedCountry = localStorage.getItem("sj_location_country");
+      const p = savedPos ?? profile.title;
+      const a = savedAff ?? profile.institution;
+      const c = savedCity ?? defaultCity;
+      const co = savedCountry ?? defaultCountry;
+      setPosition(p); setAffiliation(a); setLocationCity(c); setLocationCountry(co);
+      setProfileDraft({ position: p, affiliation: a, locationCity: c, locationCountry: co });
     } catch {}
+
+    // Load profile photo — try Supabase first, then localStorage
+    async function loadPhoto() {
+      try {
+        const { data } = await supabase
+          .from("site_settings")
+          .select("value")
+          .eq("key", "profile_photo")
+          .single();
+        if (data?.value) {
+          setProfilePhoto(data.value);
+          return;
+        }
+      } catch {}
+      try {
+        const local = localStorage.getItem("sj_profile_photo");
+        if (local) setProfilePhoto(local);
+      } catch {}
+    }
+    loadPhoto();
+  }, [defaultCity, defaultCountry]);
+
+  // Fetch news from Supabase
+  useEffect(() => {
+    supabase
+      .from("news_items")
+      .select("*")
+      .order("item_date", { ascending: false })
+      .limit(3)
+      .then(({ data }) => {
+        if (data && data.length > 0) setRecentNews(data as NewsItem[]);
+      });
   }, []);
 
   // Fetch real-time stats from Supabase
@@ -157,9 +217,14 @@ export default function HomePage() {
   async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const cropped = await circleCropPhoto(file);
+    const cropped = await squareCropPhoto(file);
     setProfilePhoto(cropped);
-    localStorage.setItem("sj_profile_photo", cropped);
+    // Save to localStorage (fast, same-browser)
+    try { localStorage.setItem("sj_profile_photo", cropped); } catch {}
+    // Save to Supabase (cross-browser visibility)
+    try {
+      await supabase.from("site_settings").upsert({ key: "profile_photo", value: cropped });
+    } catch {}
   }
 
   function saveIntro() {
@@ -174,25 +239,43 @@ export default function HomePage() {
     setEditingLinks(false);
   }
 
-  const recentNews = [...news]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 4);
+  function saveProfile() {
+    setPosition(profileDraft.position);
+    setAffiliation(profileDraft.affiliation);
+    setLocationCity(profileDraft.locationCity);
+    setLocationCountry(profileDraft.locationCountry);
+    localStorage.setItem("sj_position", profileDraft.position);
+    localStorage.setItem("sj_affiliation", profileDraft.affiliation);
+    localStorage.setItem("sj_location_city", profileDraft.locationCity);
+    localStorage.setItem("sj_location_country", profileDraft.locationCountry);
+    setEditingProfile(false);
+  }
 
   const activeSocialLinks = SOCIAL_CONFIG.filter(({ key }) => links[key]);
 
   return (
     <div style={{ maxWidth: "820px" }}>
-      {/* ─── Hero ─────────────────────────────────────────────────────── */}
+      {/* ── Hero ──────────────────────────────────────────────────── */}
       <section className="flex flex-col sm:flex-row gap-8 items-start mb-12">
         <div className="flex-shrink-0 relative">
           {profilePhoto ? (
             <img src={profilePhoto} alt="Shan Jiang"
-              className="w-32 h-32 rounded-2xl object-cover"
-              style={{ border: "3px solid var(--border)", boxShadow: "var(--shadow-md)" }} />
+              className="w-32 h-32 object-cover"
+              style={{
+                borderRadius: "16px",
+                border: "3px solid var(--border)",
+                boxShadow: "var(--shadow-md)",
+              }} />
           ) : (
             <div
-              className="w-32 h-32 rounded-2xl overflow-hidden flex items-center justify-center text-3xl font-bold"
-              style={{ border: "3px solid var(--border)", boxShadow: "var(--shadow-md)", background: "var(--accent-bg)", color: "var(--accent)" }}>
+              className="w-32 h-32 overflow-hidden flex items-center justify-center text-3xl font-bold"
+              style={{
+                borderRadius: "16px",
+                border: "3px solid var(--border)",
+                boxShadow: "var(--shadow-md)",
+                background: "var(--accent-bg)",
+                color: "var(--accent)",
+              }}>
               SJ
             </div>
           )}
@@ -211,10 +294,54 @@ export default function HomePage() {
 
         <div className="flex-1">
           <h1 style={{ color: "var(--text-heading)", marginBottom: "0.25rem" }}>{profile.name}</h1>
-          <p style={{ color: "var(--accent)", fontWeight: 600, marginBottom: "0.5rem" }}>
-            {profile.title} · {profile.institution}
-          </p>
-          <p className="text-sm mb-4" style={{ color: "var(--text-muted)" }}>{profile.location}</p>
+
+          {/* Position / Affiliation / Location — editable */}
+          {editingProfile && isAdmin ? (
+            <div className="card mb-3" style={{ border: "1.5px solid var(--accent)", padding: "0.75rem 1rem" }}>
+              <p className="text-xs font-semibold mb-2" style={{ color: "var(--accent)" }}>Edit Profile Details</p>
+              <div className="flex flex-col gap-2">
+                {[
+                  { label: "Position / Title", key: "position" as const, placeholder: "e.g. PhD Candidate" },
+                  { label: "Affiliation",       key: "affiliation" as const, placeholder: "e.g. Macquarie University" },
+                  { label: "City",              key: "locationCity" as const, placeholder: "e.g. Sydney" },
+                  { label: "Country",           key: "locationCountry" as const, placeholder: "e.g. Australia" },
+                ].map(({ label, key, placeholder }) => (
+                  <div key={key} className="flex items-center gap-2">
+                    <span className="text-xs w-28 flex-shrink-0" style={{ color: "var(--text-muted)" }}>{label}</span>
+                    <input
+                      value={profileDraft[key]}
+                      onChange={(e) => setProfileDraft((d) => ({ ...d, [key]: e.target.value }))}
+                      placeholder={placeholder}
+                      className="rounded-lg px-2 py-1 text-xs flex-1"
+                      style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 mt-3">
+                <button onClick={saveProfile} className="btn btn-primary text-xs"><Check size={12} /> Save</button>
+                <button onClick={() => { setEditingProfile(false); setProfileDraft({ position, affiliation, locationCity, locationCountry }); }}
+                  className="btn btn-outline text-xs"><X size={12} /> Cancel</button>
+              </div>
+            </div>
+          ) : (
+            <div className="relative mb-3 group">
+              <p style={{ color: "var(--accent)", fontWeight: 600, marginBottom: "0.25rem" }}>
+                {position} · {affiliation}
+              </p>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                {locationCity}{locationCountry ? `, ${locationCountry}` : ""}
+              </p>
+              {isAdmin && (
+                <button
+                  onClick={() => { setProfileDraft({ position, affiliation, locationCity, locationCountry }); setEditingProfile(true); }}
+                  className="absolute -top-1 -right-1 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ background: "var(--accent-bg)" }}
+                  title="Edit position / location">
+                  <Edit2 size={12} style={{ color: "var(--accent)" }} />
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Research statement */}
           {editingIntro && isAdmin ? (
@@ -282,7 +409,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ─── At-a-glance stats ──────────────────────────────────────── */}
+      {/* ── At-a-glance stats ─────────────────────────────────────── */}
       <section className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-12">
         {[
           { icon: BookOpen, label: "Publications",  value: stats.publications, href: "/publications" },
@@ -301,32 +428,34 @@ export default function HomePage() {
         ))}
       </section>
 
-      {/* ─── Recent news ──────────────────────────────────────────── */}
-      <section className="mb-12">
-        <h2 className="section-title">Latest News</h2>
-        <div className="flex flex-col gap-3">
-          {recentNews.map((item) => (
-            <div key={item.id} className="card flex gap-4 items-start">
-              <span className="tag mt-0.5 flex-shrink-0"
-                style={{
-                  background: (typeColor[item.type] ?? "#5F8FA8") + "22",
-                  color: typeColor[item.type] ?? "#5F8FA8",
-                }}>
-                {item.type}
-              </span>
-              <div className="flex-1">
-                <p className="font-medium text-sm" style={{ color: "var(--text-heading)" }}>{item.title}</p>
-                <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  {formatDate(item.date)} · {item.summary}
-                </p>
+      {/* ── Recent news (from Supabase) ───────────────────────────── */}
+      {recentNews.length > 0 && (
+        <section className="mb-12">
+          <h2 className="section-title">Latest News</h2>
+          <div className="flex flex-col gap-3">
+            {recentNews.map((item) => (
+              <div key={item.id} className="card flex gap-4 items-start">
+                <span className="tag mt-0.5 flex-shrink-0"
+                  style={{
+                    background: (typeColor[item.type] ?? "#5F8FA8") + "22",
+                    color: typeColor[item.type] ?? "#5F8FA8",
+                  }}>
+                  {item.type}
+                </span>
+                <div className="flex-1">
+                  <p className="font-medium text-sm" style={{ color: "var(--text-heading)" }}>{item.title}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                    {formatDate(item.item_date)} · {item.summary}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-        <Link href="/news" className="btn btn-outline mt-4 inline-flex text-sm">
-          All news <ArrowRight size={14} />
-        </Link>
-      </section>
+            ))}
+          </div>
+          <Link href="/news" className="btn btn-outline mt-4 inline-flex text-sm">
+            All news <ArrowRight size={14} />
+          </Link>
+        </section>
+      )}
     </div>
   );
 }
