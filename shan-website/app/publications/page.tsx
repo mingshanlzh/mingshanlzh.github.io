@@ -1,9 +1,52 @@
 "use client";
 import { useState, useEffect } from "react";
-import { ExternalLink, Download, Plus, Edit2, Trash2, X, Check, Star } from "lucide-react";
+import { ExternalLink, Download, Plus, Edit2, Trash2, X, Check, Star, RefreshCw } from "lucide-react";
 import { useAdmin } from "@/app/lib/AdminContext";
 import { supabase } from "@/app/lib/supabase";
 import type { Publication } from "@/app/lib/supabase";
+
+const SCHOLAR_USER = "TeSuUycAAAAJ";
+
+type SyncPub = {
+  key: string;
+  title: string;
+  authors: string;
+  journal: string;
+  year: number;
+  url: string;
+};
+
+function normaliseTitle(t: string) {
+  return t.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+async function fetchScholarPubs(): Promise<SyncPub[]> {
+  const scholarUrl = `https://scholar.google.com/citations?user=${SCHOLAR_USER}&hl=en&sortby=pubdate&pagesize=100`;
+  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(scholarUrl)}`;
+  const res = await fetch(proxyUrl);
+  if (!res.ok) throw new Error("Proxy error");
+  const json = await res.json() as { contents: string };
+  const html = json.contents;
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, "text/html");
+  const rows = doc.querySelectorAll(".gsc_a_tr");
+  const results: SyncPub[] = [];
+  rows.forEach((row) => {
+    const titleEl = row.querySelector(".gsc_a_at");
+    if (!titleEl) return;
+    const title = titleEl.textContent?.trim() ?? "";
+    const href = titleEl.getAttribute("href") ?? "";
+    const url = href ? `https://scholar.google.com${href}` : "";
+    const grays = row.querySelectorAll(".gs_gray");
+    const authors = grays[0]?.textContent?.trim() ?? "";
+    const venue = grays[1]?.textContent?.trim() ?? "";
+    const journal = venue.split(",")[0].trim();
+    const yearText = row.querySelector(".gsc_a_h")?.textContent?.trim() ?? "";
+    const year = parseInt(yearText) || new Date().getFullYear();
+    results.push({ key: normaliseTitle(title), title, authors, journal, year, url });
+  });
+  return results;
+}
 
 const EMPTY_FORM: Omit<Publication, "id" | "sort_order"> = {
   title: "", authors: "", journal: "", year: new Date().getFullYear(),
@@ -234,6 +277,11 @@ export default function PublicationsPage() {
   const [tagInput, setTagInput] = useState("");
   const [search, setSearch] = useState("");
   const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState("");
+  const [newPubs, setNewPubs] = useState<SyncPub[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     supabase
@@ -265,6 +313,52 @@ export default function PublicationsPage() {
     setEditId(id);
     setTagInput("");
     setShowAddForm(false);
+  }
+
+  async function handleSync() {
+    setSyncing(true);
+    setSyncError("");
+    setNewPubs([]);
+    try {
+      const fetched = await fetchScholarPubs();
+      const existing = new Set(pubs.map((p) => normaliseTitle(p.title)));
+      const fresh = fetched.filter((p) => !existing.has(p.key));
+      if (fresh.length === 0) {
+        setSyncError("All Scholar publications are already in your list.");
+      } else {
+        setNewPubs(fresh);
+        setSelected(new Set(fresh.map((p) => p.key)));
+      }
+    } catch {
+      setSyncError("Could not fetch Scholar page. Try again later.");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function handleImport() {
+    setImporting(true);
+    const toImport = newPubs.filter((p) => selected.has(p.key));
+    const maxOrder = pubs.reduce((m, p) => Math.max(m, p.sort_order), -1);
+    const rows = toImport.map((p, i) => ({
+      title: p.title,
+      authors: p.authors,
+      journal: p.journal,
+      year: p.year,
+      url: p.url,
+      tags: [] as string[],
+      featured: false,
+      pub_type: "journal",
+      status: "published",
+      sort_order: maxOrder + 1 + i,
+      doi: "", volume: "", pages: "", pdf: "",
+      highlight_text: "", highlight_labels: [] as string[], highlight_pdf: "",
+    }));
+    const { data } = await supabase.from("publications").insert(rows).select();
+    if (data) setPubs((p) => [...p, ...(data as Publication[])]);
+    setNewPubs([]);
+    setSelected(new Set());
+    setImporting(false);
   }
 
   async function handleDelete(id: string) {
@@ -320,11 +414,67 @@ export default function PublicationsPage() {
       <div className="flex items-center justify-between mb-4">
         <h1 style={{ marginBottom: 0 }}>Publications</h1>
         {isAdmin && (
-          <button onClick={handleAdd} className="btn btn-primary text-sm">
-            <Plus size={15} /> Add Publication
-          </button>
+          <div className="flex gap-2">
+            <button onClick={handleSync} disabled={syncing} className="btn btn-outline text-sm">
+              <RefreshCw size={14} className={syncing ? "animate-spin" : ""} />
+              {syncing ? "Syncing…" : "Sync Scholar"}
+            </button>
+            <button onClick={handleAdd} className="btn btn-primary text-sm">
+              <Plus size={15} /> Add Publication
+            </button>
+          </div>
         )}
       </div>
+
+      {/* Scholar sync results panel */}
+      {(newPubs.length > 0 || syncError) && isAdmin && (
+        <div className="card mb-6" style={{ border: "1.5px solid var(--accent)", background: "var(--accent-bg)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold" style={{ color: "var(--accent)" }}>
+              {newPubs.length > 0 ? `${newPubs.length} new publication${newPubs.length > 1 ? "s" : ""} found on Scholar` : ""}
+              {syncError && <span style={{ color: "#E53E3E" }}>{syncError}</span>}
+            </p>
+            <button onClick={() => { setNewPubs([]); setSyncError(""); }} style={{ background: "none", border: "none", cursor: "pointer" }}>
+              <X size={16} style={{ color: "var(--text-muted)" }} />
+            </button>
+          </div>
+          {newPubs.length > 0 && (
+            <>
+              <div className="flex flex-col gap-2 mb-4" style={{ maxHeight: "320px", overflowY: "auto" }}>
+                {newPubs.map((p) => (
+                  <label key={p.key} className="flex items-start gap-3 cursor-pointer p-2 rounded-lg"
+                    style={{ background: "var(--bg-primary)", border: "1px solid var(--border)" }}>
+                    <input type="checkbox" checked={selected.has(p.key)}
+                      onChange={(e) => setSelected((s) => {
+                        const n = new Set(s);
+                        e.target.checked ? n.add(p.key) : n.delete(p.key);
+                        return n;
+                      })}
+                      style={{ marginTop: "2px", flexShrink: 0 }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium leading-snug" style={{ color: "var(--text-heading)" }}>{p.title}</p>
+                      <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                        {p.authors && <>{p.authors} · </>}{p.journal && <em>{p.journal}</em>}{p.year && <> · {p.year}</>}
+                      </p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              <div className="flex gap-2 items-center">
+                <button onClick={handleImport} disabled={importing || selected.size === 0} className="btn btn-primary text-sm">
+                  <Check size={14} /> {importing ? "Importing…" : `Import ${selected.size} selected`}
+                </button>
+                <button onClick={() => setSelected(new Set(newPubs.map((p) => p.key)))} className="btn btn-outline text-xs">
+                  Select all
+                </button>
+                <button onClick={() => setSelected(new Set())} className="btn btn-outline text-xs">
+                  Deselect all
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
         Also see my full list on{" "}
