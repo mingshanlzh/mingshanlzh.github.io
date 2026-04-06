@@ -169,7 +169,7 @@ function PubForm({
           </label>
         </div>
 
-        {/* Featured highlight fields -- shown only when featured is checked */}
+        {/* Featured highlight fields — shown only when featured is checked */}
         {form.featured && (
           <div className="flex flex-col gap-3 p-3 rounded-lg" style={{ background: "var(--accent-bg)", border: "1px solid var(--border)" }}>
             <p className="text-xs font-semibold" style={{ color: "var(--accent)" }}>Featured Research Highlights</p>
@@ -177,7 +177,7 @@ function PubForm({
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Highlight Text</label>
               <textarea rows={3} value={form.highlight_text || ""}
                 onChange={(e) => setForm({ ...form, highlight_text: e.target.value })}
-                placeholder="Brief description of key findings or why this research matters..."
+                placeholder="Brief description of key findings or why this research matters…"
                 className="w-full rounded-lg px-3 py-2 text-sm"
                 style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", resize: "vertical" }} />
             </div>
@@ -197,7 +197,7 @@ function PubForm({
               <div className="flex gap-2">
                 <input value={hlLabelInput} onChange={(e) => setHlLabelInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addHlLabel())}
-                  placeholder="e.g. DCEA, Equity, Australia -- press Enter"
+                  placeholder="e.g. DCEA, Equity, Australia — press Enter"
                   className="rounded-lg px-2 py-1 text-xs flex-1"
                   style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
                 <button type="button" onClick={addHlLabel} className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.5rem" }}>+</button>
@@ -215,7 +215,7 @@ function PubForm({
 
         <div className="flex gap-2 pt-2">
           <button type="submit" disabled={saving} className="btn btn-primary text-sm">
-            <Check size={14} /> {saving ? "Saving..." : editId ? "Save Changes" : "Add Publication"}
+            <Check size={14} /> {saving ? "Saving…" : editId ? "Save Changes" : "Add Publication"}
           </button>
           <button type="button" onClick={onCancel} className="btn btn-outline text-sm">Cancel</button>
         </div>
@@ -313,7 +313,7 @@ export default function PublicationsPage() {
 
   const grouped = groupByYear(filtered);
 
-  if (loading) return <div className="text-sm" style={{ color: "var(--text-muted)" }}>Loading...</div>;
+  if (loading) return <div className="text-sm" style={{ color: "var(--text-muted)" }}>Loading…</div>;
 
   return (
     <div style={{ maxWidth: "860px" }}>
@@ -339,13 +339,13 @@ export default function PublicationsPage() {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by title, author, journal, or tag..."
+          placeholder="Search by title, author, journal, or tag…"
           className="w-full rounded-lg px-3 py-2 text-sm"
           style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }}
         />
       </div>
 
-      {/* Add form -- shown at top only when adding new */}
+      {/* Add form — shown at top only when adding new */}
       {showAddForm && isAdmin && (
         <PubForm
           form={form}
@@ -370,7 +370,7 @@ export default function PublicationsPage() {
           <h2 className="section-title">{year || "Year unknown"}</h2>
           <div className="flex flex-col gap-4">
             {items.map((pub) => {
-              // Inline edit -- render form in place of the card
+              // Inline edit — render form in place of the card
               if (isAdmin && editId === pub.id) {
                 return (
                   <div key={pub.id}>
@@ -397,7 +397,7 @@ export default function PublicationsPage() {
                           {pub.title}
                         </p>
                         {pub.featured && (
-                          <Star size={13} style={{ color: "#F6AD55", flexShrink: 0, marginTop: "2px" }} title="Featured Research" />
+                          <Star size={13} style={{ color: "#F6AD55", flexShrink: 0, marginTop: "2px" }} />
                         )}
                       </div>
                       {pub.authors && <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>{pub.authors}</p>}
@@ -405,7 +405,7 @@ export default function PublicationsPage() {
                         {pub.journal}
                         {pub.volume && `, ${pub.volume}`}
                         {pub.pages && `, ${pub.pages}`}
-                        {pub.year && ` - ${pub.year}`}
+                        {pub.year && ` · ${pub.year}`}
                       </p>
                       {pub.status !== "published" && (
                         <span className="tag text-xs mt-1" style={{ background: "#FEF3C7", color: "#92400E" }}>
