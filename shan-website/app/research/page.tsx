@@ -1,5 +1,5 @@
 "use client";
-import { Star, Download, ExternalLink, Edit2, Check, X } from "lucide-react";
+import { Star, Download, ExternalLink, Edit2, Check, X, Trash2 } from "lucide-react";
 import { useAdmin } from "@/app/lib/AdminContext";
 import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/supabase";
@@ -38,7 +38,7 @@ function HighlightEditor({
       <div>
         <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Highlight Text</label>
         <textarea rows={4} value={text} onChange={(e) => setText(e.target.value)}
-          placeholder="Brief description of key findings or why this research matters..."
+          placeholder="Brief description of key findings or why this research matters…"
           className="w-full rounded-lg px-3 py-2 text-sm"
           style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", resize: "vertical" }} />
       </div>
@@ -58,7 +58,7 @@ function HighlightEditor({
         <div className="flex gap-2">
           <input value={labelInput} onChange={(e) => setLabelInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addLabel())}
-            placeholder="Add label - press Enter"
+            placeholder="Add label — press Enter"
             className="rounded-lg px-2 py-1 text-xs flex-1"
             style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
           <button type="button" onClick={addLabel} className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.5rem" }}>+</button>
@@ -73,7 +73,7 @@ function HighlightEditor({
       </div>
       <div className="flex gap-2">
         <button onClick={handleSave} disabled={saving} className="btn btn-primary text-xs" style={{ padding: "0.3rem 0.8rem" }}>
-          <Check size={12} /> {saving ? "Saving..." : "Save Highlights"}
+          <Check size={12} /> {saving ? "Saving…" : "Save Highlights"}
         </button>
         <button onClick={onCancel} className="btn btn-outline text-xs" style={{ padding: "0.3rem 0.8rem" }}>
           <X size={12} /> Cancel
@@ -87,13 +87,26 @@ function PaperCard({
   pub,
   isAdmin,
   onUpdate,
+  onDelete,
 }: {
   pub: Publication;
   isAdmin: boolean;
   onUpdate: (updated: Publication) => void;
+  onDelete: (id: string) => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleUnfeature() {
+    setDeleting(true);
+    const { error } = await supabase
+      .from("publications")
+      .update({ featured: false })
+      .eq("id", pub.id);
+    if (!error) onDelete(pub.id);
+    setDeleting(false);
+  }
 
   async function handleSaveHighlights(fields: { highlight_text: string; highlight_labels: string[]; highlight_pdf: string }) {
     const { data, error } = await supabase
@@ -124,17 +137,24 @@ function PaperCard({
             {pub.title}
           </h2>
           {isAdmin && (
-            <button onClick={() => { setEditing((e) => !e); setExpanded(true); }}
-              className="btn btn-outline text-xs flex-shrink-0" style={{ padding: "0.25rem 0.5rem" }}
-              title="Edit highlights">
-              <Edit2 size={12} />
-            </button>
+            <div className="flex gap-1 flex-shrink-0">
+              <button onClick={() => { setEditing((e) => !e); setExpanded(true); }}
+                className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.5rem" }}
+                title="Edit highlights">
+                <Edit2 size={12} />
+              </button>
+              <button onClick={handleUnfeature} disabled={deleting}
+                className="btn btn-outline text-xs" style={{ padding: "0.25rem 0.5rem", color: "#E53E3E", borderColor: "#E53E3E" }}
+                title="Remove from Featured Research">
+                <Trash2 size={12} />
+              </button>
+            </div>
           )}
         </div>
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
           {pub.authors}
-          {pub.journal && <> - <em>{pub.journal}</em></>}
-          {pub.year && <> - {pub.year}</>}
+          {pub.journal && <> · <em>{pub.journal}</em></>}
+          {pub.year && <> · {pub.year}</>}
         </p>
       </div>
 
@@ -150,13 +170,13 @@ function PaperCard({
             </div>
           )}
 
-          {/* Highlight text - expandable if long */}
+          {/* Highlight text — expandable if long */}
           {pub.highlight_text && (
             <div>
               <p className="text-sm" style={{ color: "var(--text-body)", lineHeight: 1.75 }}>
                 {expanded || pub.highlight_text.length < 300
                   ? pub.highlight_text
-                  : pub.highlight_text.slice(0, 280) + "..."}
+                  : pub.highlight_text.slice(0, 280) + "…"}
               </p>
               {pub.highlight_text.length >= 300 && (
                 <button onClick={() => setExpanded((e) => !e)}
@@ -192,13 +212,7 @@ function PaperCard({
         {pub.url && (
           <a href={pub.url} target="_blank" rel="noopener noreferrer"
             className="btn btn-outline text-xs" style={{ padding: "0.3rem 0.8rem" }}>
-            <ExternalLink size={12} /> View paper
-          </a>
-        )}
-        {pub.doi && (
-          <a href={`https://doi.org/${pub.doi}`} target="_blank" rel="noopener noreferrer"
-            className="btn btn-outline text-xs" style={{ padding: "0.3rem 0.8rem" }}>
-            <ExternalLink size={12} /> DOI
+            <ExternalLink size={12} /> View
           </a>
         )}
       </div>
@@ -228,22 +242,22 @@ export default function ResearchPage() {
     setPapers((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
   }
 
+  function handleDelete(id: string) {
+    setPapers((prev) => prev.filter((p) => p.id !== id));
+  }
+
   if (loading) {
     return (
       <div style={{ maxWidth: "860px" }}>
         <h1 style={{ marginBottom: "2rem" }}>Featured Research</h1>
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading...</p>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading…</p>
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: "860px" }}>
-      <h1 style={{ marginBottom: "0.5rem" }}>Featured Research</h1>
-      <p className="text-sm mb-8" style={{ color: "var(--text-muted)" }}>
-        Selected papers with extended summaries. Mark a publication as Featured Research in the{" "}
-        <a href="/publications" style={{ color: "var(--accent)" }}>Publications</a> page to add it here.
-      </p>
+      <h1 style={{ marginBottom: "2rem" }}>Featured Research</h1>
 
       {papers.length === 0 ? (
         <div className="card" style={{ textAlign: "center", padding: "3rem 2rem", background: "var(--accent-bg)" }}>
@@ -254,7 +268,7 @@ export default function ResearchPage() {
         </div>
       ) : (
         papers.map((pub) => (
-          <PaperCard key={pub.id} pub={pub} isAdmin={isAdmin} onUpdate={handleUpdate} />
+          <PaperCard key={pub.id} pub={pub} isAdmin={isAdmin} onUpdate={handleUpdate} onDelete={handleDelete} />
         ))
       )}
     </div>
