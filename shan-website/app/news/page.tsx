@@ -61,7 +61,7 @@ function NewsForm({
         ].map(({ key, label, placeholder }) => (
           <div key={key}>
             <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>{label}</label>
-            <input type="text" value={(form as Record<string, string>)[key] ?? ""} placeholder={placeholder}
+            <input type="text" value={((form as Record<string, unknown>)[key] ?? "") as string} placeholder={placeholder}
               onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
               className="w-full rounded-lg px-2 py-1.5 text-xs"
               style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)" }} />
