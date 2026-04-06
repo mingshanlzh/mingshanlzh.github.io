@@ -92,7 +92,7 @@ function ProjectForm({
           <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-heading)" }}>Summary (optional, visible to guests)</label>
           <textarea rows={2} value={form.summary || ""} onChange={(e) => setForm({ ...form, summary: e.target.value })}
             className="w-full rounded-lg px-3 py-2 text-sm"
-            style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primar"y)", resize: "vertical" }} />
+            style={{ border: "1.5px solid var(--border)", outline: "none", background: "var(--bg-primary)", resize: "vertical" }} />
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
