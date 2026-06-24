@@ -49,6 +49,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function init() {
+      try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) setIsAdmin(true);
 
@@ -61,6 +62,9 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           vis[row.page_id] = row.visible;
         });
         setPageVisibility(vis);
+      }
+      } catch (err) {
+        console.warn("Supabase unavailable, using defaults:", err);
       }
 
       try {
