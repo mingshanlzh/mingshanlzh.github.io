@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Lock, Folder, Plus, Edit2, Trash2, X, Check, ExternalLink, Upload, AlertTriangle, Info } from "lucide-react";
+import { Lock, Folder, Plus, Edit2, Trash2, X, Check, ExternalLink, Upload, AlertTriangle, Info, Users } from "lucide-react";
 import { useAdmin } from "@/app/lib/AdminContext";
 import { supabase } from "@/app/lib/supabase";
 import type { Project, DocAttachment, GuestAccount } from "@/app/lib/supabase";
@@ -26,7 +26,7 @@ function ProjectForm({
   labelInput: string;
   setLabelInput: React.Dispatch<React.SetStateAction<string>>;
   guestAccounts: GuestAccount[];
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent, extraDoc?: DocAttachment) => void;
   onCancel: () => void;
 }) {
   const [newDocName, setNewDocName] = useState("");
@@ -57,14 +57,18 @@ function ProjectForm({
   }
 
   function handleSubmitWithPendingDoc(e: React.FormEvent) {
-    // Auto-confirm any pending doc entry before submit
+    // Auto-confirm any pending doc entry before submit.
+    // The pending doc is passed synchronously to onSubmit - relying on setForm
+    // alone loses it, because state updates are async and submit reads stale form.
+    let extraDoc: DocAttachment | undefined;
     if (newDocName.trim() && newDocUrl.trim()) {
       const doc: DocAttachment = { id: `doc_${Date.now()}`, name: newDocName.trim(), url: newDocUrl.trim() };
+      extraDoc = doc;
       setForm((f) => ({ ...f, documents: [...(f.documents || []), doc] }));
       setNewDocName("");
       setNewDocUrl("");
     }
-    onSubmit(e);
+    onSubmit(e, extraDoc);
   }
 
   return (
@@ -313,36 +317,56 @@ export default function ProjectsPage() {
       alert("Upload failed. Please try again.");
       return;
     }
+    // Notify the admin via the messages inbox (visible in the admin panel)
+    const proj = projects.find((p) => p.id === projId);
+    const uploader = guestUser?.display_name || guestUser?.username || "Admin";
+    try {
+      await supabase.from("contact_messages").insert({
+        name: uploader,
+        email: "document-upload@site.internal",
+        subject: `New document uploaded: ${guestUploadName}`,
+        message: `"${uploader}" uploaded a document "${guestUploadName}" to project "${proj?.title ?? projId}". Storage path: uploads/${path}`,
+        guest_username: guestUser?.username ?? null,
+      });
+    } catch {}
     setUploadProjectId(null);
     setGuestUploadName("");
     setGuestUploadFile(null);
     alert("Document submitted successfully. The admin will be notified.");
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent, extraDoc?: DocAttachment) {
     e.preventDefault();
     setSaving(true);
+    // Merge any pending (not yet confirmed) doc synchronously so it is never lost on save.
+    const payload = extraDoc
+      ? { ...form, documents: [...(form.documents || []), extraDoc] }
+      : { ...form };
     if (editId) {
       const { data, error } = await supabase
         .from("projects")
-        .update({ ...form, updated_at: new Date().toISOString() })
+        .update({ ...payload, updated_at: new Date().toISOString() })
         .eq("id", editId)
         .select()
         .single();
-      if (!error && data) {
+      if (error) {
+        alert("Save failed - the change was not stored. Please try again.");
+      } else if (data) {
         setProjects((p) => p.map((x) => (x.id === editId ? (data as Project) : x)));
+        setEditId(null);
       }
-      setEditId(null);
     } else {
       const { data, error } = await supabase
         .from("projects")
-        .insert({ ...form })
+        .insert(payload)
         .select()
         .single();
-      if (!error && data) {
+      if (error) {
+        alert("Save failed - the project was not created. Please try again.");
+      } else if (data) {
         setProjects((p) => [data as Project, ...p]);
+        setShowAddForm(false);
       }
-      setShowAddForm(false);
     }
     setSaving(false);
   }
@@ -492,10 +516,24 @@ export default function ProjectsPage() {
 
               <div className="flex flex-wrap gap-2 mb-3">
                 {proj.tags.map((t) => <span key={t} className="tag">{t}</span>)}
-                {isAdmin && proj.collaborator_labels.map((l) => (
-                  <span key={l} className="tag" style={{ background: "var(--accent)", color: "white" }}>{l}</span>
-                ))}
               </div>
+
+              {/* Collaborators - visible to admin and guests */}
+              {proj.collaborator_labels.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  <span className="flex items-center gap-1 text-xs font-medium" style={{ color: "var(--text-heading)" }}>
+                    <Users size={12} /> Collaborators:
+                  </span>
+                  {proj.collaborator_labels.map((l) => {
+                    const acct = guestAccounts.find((g) => g.collaborator_label === l);
+                    return (
+                      <span key={l} className="tag" style={{ background: "var(--accent)", color: "white" }}>
+                        {acct?.display_name || l}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
 
               {proj.last_updated && (
                 <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>
