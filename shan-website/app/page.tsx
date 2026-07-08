@@ -161,6 +161,33 @@ export default function HomePage() {
       setProfileDraft({ position: p, affiliation: a, locationCity: c, locationCountry: co });
     } catch {}
 
+    // Load from Supabase (authoritative, cross-device) - overrides localStorage
+    async function loadSettings() {
+      try {
+        const { data } = await supabase
+          .from("site_settings")
+          .select("key, value")
+          .in("key", ["home_intro", "home_links", "home_identity"]);
+        if (!data) return;
+        const map: Record<string, string> = {};
+        data.forEach((row: { key: string; value: string }) => { map[row.key] = row.value; });
+        if (map.home_intro) { setIntro(map.home_intro); setIntroDraft(map.home_intro); }
+        if (map.home_links) {
+          const parsed = JSON.parse(map.home_links) as Record<string, string>;
+          setLinks(parsed); setLinksDraft(parsed);
+        }
+        if (map.home_identity) {
+          const id = JSON.parse(map.home_identity) as {
+            position: string; affiliation: string; locationCity: string; locationCountry: string;
+          };
+          setPosition(id.position); setAffiliation(id.affiliation);
+          setLocationCity(id.locationCity); setLocationCountry(id.locationCountry);
+          setProfileDraft(id);
+        }
+      } catch {}
+    }
+    loadSettings();
+
     // Load profile photo — try Supabase first, then localStorage
     async function loadPhoto() {
       try {
@@ -227,28 +254,42 @@ export default function HomePage() {
     } catch {}
   }
 
-  function saveIntro() {
+  async function saveIntro() {
     setIntro(introDraft);
-    localStorage.setItem("sj_intro", introDraft);
+    try { localStorage.setItem("sj_intro", introDraft); } catch {}
     setEditingIntro(false);
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert({ key: "home_intro", value: introDraft });
+    if (error) alert("Saved locally, but cloud save failed - this edit will not be visible to visitors. Please check you are logged in as admin and try again.");
   }
 
-  function saveLinks() {
+  async function saveLinks() {
     setLinks(linksDraft);
-    localStorage.setItem("sj_links", JSON.stringify(linksDraft));
+    try { localStorage.setItem("sj_links", JSON.stringify(linksDraft)); } catch {}
     setEditingLinks(false);
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert({ key: "home_links", value: JSON.stringify(linksDraft) });
+    if (error) alert("Saved locally, but cloud save failed - this edit will not be visible to visitors. Please check you are logged in as admin and try again.");
   }
 
-  function saveProfile() {
+  async function saveProfile() {
     setPosition(profileDraft.position);
     setAffiliation(profileDraft.affiliation);
     setLocationCity(profileDraft.locationCity);
     setLocationCountry(profileDraft.locationCountry);
-    localStorage.setItem("sj_position", profileDraft.position);
-    localStorage.setItem("sj_affiliation", profileDraft.affiliation);
-    localStorage.setItem("sj_location_city", profileDraft.locationCity);
-    localStorage.setItem("sj_location_country", profileDraft.locationCountry);
+    try {
+      localStorage.setItem("sj_position", profileDraft.position);
+      localStorage.setItem("sj_affiliation", profileDraft.affiliation);
+      localStorage.setItem("sj_location_city", profileDraft.locationCity);
+      localStorage.setItem("sj_location_country", profileDraft.locationCountry);
+    } catch {}
     setEditingProfile(false);
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert({ key: "home_identity", value: JSON.stringify(profileDraft) });
+    if (error) alert("Saved locally, but cloud save failed - this edit will not be visible to visitors. Please check you are logged in as admin and try again.");
   }
 
   const activeSocialLinks = SOCIAL_CONFIG.filter(({ key }) => links[key]);
