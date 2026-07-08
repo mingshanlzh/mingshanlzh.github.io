@@ -13,7 +13,7 @@ const DEFAULT_PAGES: Record<string, boolean> = {
   publications: true, cv: true, projects: true, teaching: true,
   supervision: true, talks: true, news: true, research: true,
   media: true, awards: true, services: true, affiliations: true,
-  blog: true, contact: true,
+  blog: true, contact: true, resources: true,
 };
 
 type AdminContextType = {
