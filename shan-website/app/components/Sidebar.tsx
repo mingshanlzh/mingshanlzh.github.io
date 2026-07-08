@@ -5,7 +5,7 @@ import { useState, useRef, useEffect } from "react";
 import {
   Home, BookOpen, FileText, Folder, GraduationCap, Users,
   Mic2, Newspaper, Star, Tv2, Trophy, Wrench, Building2,
-  PenLine, Mail, ChevronRight, Menu, X, Settings, UserCircle
+  PenLine, Mail, ChevronRight, Menu, X, Settings, UserCircle, Database
 } from "lucide-react";
 import { useAdmin } from "@/app/lib/AdminContext";
 
@@ -15,6 +15,7 @@ const navItems = [
   { label: "Publications",     href: "/publications",   icon: BookOpen },
   { label: "Featured Research",href: "/research",       icon: Star },
   { label: "Working Projects", href: "/projects",       icon: Folder },
+  { label: "Open Knowledge",   href: "/resources",      icon: Database },
   { label: "Talks",            href: "/talks",          icon: Mic2 },
   { label: "Team",             href: "/supervision",    icon: Users },
   { label: "Teaching",         href: "/teaching",       icon: GraduationCap },
