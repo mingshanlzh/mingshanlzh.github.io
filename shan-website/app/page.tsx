@@ -301,7 +301,7 @@ export default function HomePage() {
         <div className="flex-shrink-0 relative">
           {profilePhoto ? (
             <img src={profilePhoto} alt="Shan Jiang"
-              className="w-32 h-32 object-cover"
+              className="w-40 h-40 object-cover"
               style={{
                 borderRadius: "16px",
                 border: "3px solid var(--border)",
@@ -309,7 +309,7 @@ export default function HomePage() {
               }} />
           ) : (
             <div
-              className="w-32 h-32 overflow-hidden flex items-center justify-center text-3xl font-bold"
+              className="w-40 h-40 overflow-hidden flex items-center justify-center text-4xl font-bold"
               style={{
                 borderRadius: "16px",
                 border: "3px solid var(--border)",
@@ -334,7 +334,7 @@ export default function HomePage() {
         </div>
 
         <div className="flex-1">
-          <h1 style={{ color: "var(--text-heading)", marginBottom: "0.25rem" }}>{profile.name}</h1>
+          <h1 style={{ color: "var(--text-heading)", marginBottom: "0.25rem", fontSize: "2.1rem", letterSpacing: "-0.02em" }}>{profile.name}</h1>
 
           {/* Position / Affiliation / Location — editable */}
           {editingProfile && isAdmin ? (
