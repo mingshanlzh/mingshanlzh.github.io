@@ -8,7 +8,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://shanjiang.com"),
+  metadataBase: new URL("https://shanjiang.info"),
   title: "Shan Jiang | Health Economist",
   description:
     "Personal academic website of Shan Jiang — PhD Candidate at MUCHE, Macquarie University. Research in distributional cost-effectiveness analysis, health equity, and advanced health economic modelling.",
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Shan Jiang | Health Economist",
     description: "Research in distributional cost-effectiveness analysis and health equity.",
-    url: "https://shanjiang.com",
+    url: "https://shanjiang.info",
     siteName: "Shan Jiang",
     locale: "en_AU",
     type: "website",
