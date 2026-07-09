@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Users, Plus, Edit2, Trash2, X, Check, Upload, ChevronRight, Mail, Globe } from "lucide-react";
 import Link from "next/link";
 import { useAdmin } from "@/app/lib/AdminContext";
+import { supabase } from "@/app/lib/supabase";
 
 const ROLE_OPTIONS = [
   "Supervisor", "Advisor", "Postdoc", "PhD Student",
@@ -29,7 +30,7 @@ const EMPTY_FORM: Omit<Member, "id"> = {
   email: "", website: "", bio: "", photo: "",
 };
 
-function circleCrop(file: File): Promise<string> {
+function squareCrop(file: File): Promise<string> {
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -40,10 +41,6 @@ function circleCrop(file: File): Promise<string> {
         canvas.width = 200;
         canvas.height = 200;
         const ctx = canvas.getContext("2d")!;
-        ctx.beginPath();
-        ctx.arc(100, 100, 100, 0, Math.PI * 2);
-        ctx.closePath();
-        ctx.clip();
         const sx = (img.width - size) / 2;
         const sy = (img.height - size) / 2;
         ctx.drawImage(img, sx, sy, size, size, 0, 0, 200, 200);
@@ -90,10 +87,10 @@ function MemberDrawer({ member, onClose, isAdmin, onEdit }: {
           <div className="flex flex-col items-center mb-6">
             {member.photo ? (
               <img src={member.photo} alt={member.name}
-                className="w-24 h-24 rounded-full object-cover mb-3"
+                className="w-24 h-24 rounded-2xl object-cover mb-3"
                 style={{ border: "2px solid var(--border)" }} />
             ) : (
-              <div className="w-24 h-24 rounded-full flex items-center justify-center font-bold text-2xl mb-3"
+              <div className="w-24 h-24 rounded-2xl flex items-center justify-center font-bold text-2xl mb-3"
                 style={{ background: "var(--accent-bg)", color: "var(--accent)" }}>
                 {member.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
               </div>
@@ -153,11 +150,26 @@ export default function TeamPage() {
       const stored = localStorage.getItem("sj_team");
       if (stored) setMembers(JSON.parse(stored));
     } catch {}
+    // Supabase is authoritative (visible to all visitors); overrides localStorage
+    supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "team_members")
+      .single()
+      .then(({ data }) => {
+        if (data?.value) {
+          try { setMembers(JSON.parse(data.value) as Member[]); } catch {}
+        }
+      });
   }, []);
 
-  function saveMembers(updated: Member[]) {
+  async function saveMembers(updated: Member[]) {
     setMembers(updated);
-    localStorage.setItem("sj_team", JSON.stringify(updated));
+    try { localStorage.setItem("sj_team", JSON.stringify(updated)); } catch {}
+    const { error } = await supabase
+      .from("site_settings")
+      .upsert({ key: "team_members", value: JSON.stringify(updated) });
+    if (error) alert("Saved locally, but cloud save failed - visitors will not see this change. Please check you are logged in as admin and try again.");
   }
 
   function handleAdd() {
@@ -180,7 +192,7 @@ export default function TeamPage() {
   async function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    const cropped = await circleCrop(file);
+    const cropped = await squareCrop(file);
     setForm((f) => ({ ...f, photo: cropped }));
   }
 
@@ -223,10 +235,10 @@ export default function TeamPage() {
             <div className="flex items-center gap-4">
               {form.photo ? (
                 <img src={form.photo} alt="preview"
-                  className="w-16 h-16 rounded-full object-cover"
+                  className="w-16 h-16 rounded-2xl object-cover"
                   style={{ border: "2px solid var(--border)" }} />
               ) : (
-                <div className="w-16 h-16 rounded-full flex items-center justify-center text-lg font-bold"
+                <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-lg font-bold"
                   style={{ background: "var(--accent-bg)", color: "var(--accent)" }}>
                   {form.name ? form.name.split(" ").map((n) => n[0]).join("").slice(0, 2) : "?"}
                 </div>
@@ -236,7 +248,7 @@ export default function TeamPage() {
                 <button type="button" onClick={() => fileRef.current?.click()} className="btn btn-outline text-xs">
                   <Upload size={12} /> {form.photo ? "Change Photo" : "Upload Photo"}
                 </button>
-                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Auto-cropped to circle</p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>Auto-cropped to square</p>
               </div>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
@@ -340,10 +352,10 @@ export default function TeamPage() {
                 <div className="flex flex-col items-center text-center pt-2 pb-1">
                   {m.photo ? (
                     <img src={m.photo} alt={m.name}
-                      className="w-16 h-16 rounded-full object-cover mb-3"
+                      className="w-16 h-16 rounded-2xl object-cover mb-3"
                       style={{ border: "2px solid var(--border)" }} />
                   ) : (
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center font-bold text-xl mb-3"
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-xl mb-3"
                       style={{ background: "var(--accent-bg)", color: "var(--accent)" }}>
                       {m.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                     </div>
@@ -384,10 +396,10 @@ export default function TeamPage() {
                 <div className="flex flex-col items-center text-center pt-2 pb-1">
                   {m.photo ? (
                     <img src={m.photo} alt={m.name}
-                      className="w-14 h-14 rounded-full object-cover mb-2"
+                      className="w-14 h-14 rounded-2xl object-cover mb-2"
                       style={{ border: "2px solid var(--border)", filter: "grayscale(30%)" }} />
                   ) : (
-                    <div className="w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg mb-2"
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center font-bold text-lg mb-2"
                       style={{ background: "var(--border)", color: "var(--text-muted)" }}>
                       {m.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                     </div>
