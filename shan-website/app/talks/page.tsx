@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Mic2, Video, Download, ExternalLink, MapPin, Calendar, Plus, Edit2, Trash2, X, Check } from "lucide-react";
 import { useAdmin } from "@/app/lib/AdminContext";
+import talksData from "@/data/talks.json";
 
 type Talk = {
   id: string;
@@ -46,7 +47,7 @@ function groupByYear(arr: Talk[]) {
 
 export default function TalksPage() {
   const { isAdmin } = useAdmin();
-  const [talks, setTalks] = useState<Talk[]>([]);
+  const [talks, setTalks] = useState<Talk[]>(talksData as unknown as Talk[]);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<Omit<Talk, "id">>(EMPTY_FORM);
@@ -54,7 +55,10 @@ export default function TalksPage() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem("sj_talks");
-      if (stored) setTalks(JSON.parse(stored));
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) setTalks(parsed);
+      }
     } catch {}
   }, []);
 
