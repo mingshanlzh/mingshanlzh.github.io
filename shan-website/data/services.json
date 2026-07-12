@@ -1,52 +1,79 @@
 {
   "organisations": [
     {
-      "id": "org-1",
+      "id": "org-heq-sig",
       "role": "Convenor, Health Equity Special Interest Group",
       "organisation": "Australian Health Economics Society (AHES)",
-      "period": "January 2026 – present",
+      "period": "2025 – present",
       "link": "https://ahes.org.au/ahes/resources/special-interest-group/health-equity/"
     },
     {
-      "id": "org-2",
+      "id": "org-hpr-sig",
       "role": "Secretary, Health Preference Research Special Interest Group",
       "organisation": "Australian Health Economics Society (AHES)",
       "period": "2024 – 2025",
-      "link": "https://ahes.org.au/ahes/resources/special-interest-group/health-equity/"
+      "link": "https://ahes.org.au/ahes/resources/special-interest-group/health-preference-research/"
+    },
+    {
+      "id": "org-chprn",
+      "role": "Co-founder",
+      "organisation": "Chinese Health Preference Research Network",
+      "period": "2019 – present",
+      "link": ""
     }
   ],
   "editorial": [
     {
-      "id": "ed-1",
-      "role": "Section Editor (Health Economics and Outcomes Research)",
+      "id": "ed-adv-ther-se",
+      "role": "Section Editor, Health Economics and Outcomes Research (HEOR)",
       "journal": "Advances in Therapy",
       "publisher": "Springer",
-      "period": "2026 – present",
+      "period": "2023 – present",
       "link": "https://link.springer.com/journal/12325/editorial-board"
     },
     {
-      "id": "ed-2",
-      "role": "Editorial Board Member",
-      "journal": "Advances in Therapy",
-      "publisher": "Springer",
-      "period": "2023 – 2026",
-      "link": "https://link.springer.com/journal/12325/editorial-board"
-    },
-    {
-      "id": "ed-3",
+      "id": "ed-onc-ther",
       "role": "Editorial Board Member",
       "journal": "Oncology and Therapy",
       "publisher": "Springer",
       "period": "2023 – present",
-      "link": "https://link.springer.com/journal/40487/editorial-board"
+      "link": "https://link.springer.com/journal/40487/editors"
     },
     {
-      "id": "ed-4",
+      "id": "ed-cdi",
       "role": "Editorial Board Member",
       "journal": "Clinical Drug Investigation",
       "publisher": "Springer",
       "period": "2023 – present",
       "link": "https://link.springer.com/journal/40261/editorial-board"
     }
+  ],
+  "refereeing": [
+    "Lancet",
+    "Lancet Global Health",
+    "Lancet Psychiatry",
+    "Lancet Rheumatology",
+    "International Journal of Epidemiology",
+    "JAMA Network Open",
+    "Value in Health",
+    "Value in Health Regional Issues",
+    "BMJ",
+    "BMJ Global Health",
+    "BMJ Public Health",
+    "BMJ Open",
+    "China Economic Review",
+    "European Journal of Health Economics",
+    "Applied Health Economics and Health Policy",
+    "Advances in Therapy",
+    "BMC Health Services Research",
+    "Expert Review of Pharmacoeconomics & Outcomes Research",
+    "Cost Effectiveness and Resource Allocation",
+    "Clinical Drug Investigation",
+    "The Chinese Economy",
+    "Health Equity",
+    "Journal of Epidemiology and Community Health",
+    "Trials",
+    "International Journal of Health Policy and Management",
+    "International Journal of Health Planning and Management"
   ]
 }
