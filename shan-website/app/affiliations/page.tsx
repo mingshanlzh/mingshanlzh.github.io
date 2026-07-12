@@ -6,7 +6,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/app/lib/supabase";
 
 type AffItem = { id: string; role: string; institution: string; location?: string; period?: string; link: string };
-type AffData = { main: AffItem[]; adjunct: AffItem[] };
+type Section = "main" | "adjunct" | "past";
+type AffData = { main: AffItem[]; adjunct: AffItem[]; past: AffItem[] };
 
 const blank = (): Omit<AffItem, "id"> => ({ role: "", institution: "", location: "", period: "", link: "" });
 
@@ -22,7 +23,8 @@ export default function AffiliationsPage() {
   const { isAdmin } = useAdmin();
   const [main, setMain] = useState<AffItem[]>(affiliationsData.main as AffItem[]);
   const [adjunct, setAdjunct] = useState<AffItem[]>(affiliationsData.adjunct as AffItem[]);
-  const [addingTo, setAddingTo] = useState<"main" | "adjunct" | null>(null);
+  const [past, setPast] = useState<AffItem[]>((affiliationsData.past ?? []) as AffItem[]);
+  const [addingTo, setAddingTo] = useState<Section | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(blank());
   const [saving, setSaving] = useState(false);
@@ -37,19 +39,20 @@ export default function AffiliationsPage() {
       .then(({ data }) => {
         if (data?.value) {
           try {
-            const parsed = JSON.parse(data.value) as AffData;
+            const parsed = JSON.parse(data.value) as Partial<AffData>;
             if (parsed.main) setMain(parsed.main);
             if (parsed.adjunct) setAdjunct(parsed.adjunct);
+            if (parsed.past) setPast(parsed.past);
           } catch {}
         }
       });
   }, []);
 
-  // Persist both lists to Supabase. Returns true on success.
-  async function persist(nextMain: AffItem[], nextAdjunct: AffItem[]): Promise<boolean> {
+  // Persist all lists to Supabase. Returns true on success.
+  async function persist(nextMain: AffItem[], nextAdjunct: AffItem[], nextPast: AffItem[]): Promise<boolean> {
     const { error } = await supabase
       .from("site_settings")
-      .upsert({ key: "affiliations", value: JSON.stringify({ main: nextMain, adjunct: nextAdjunct }) });
+      .upsert({ key: "affiliations", value: JSON.stringify({ main: nextMain, adjunct: nextAdjunct, past: nextPast }) });
     if (error) {
       alert("Save failed - the change was not stored. Please check you are logged in as admin and try again.");
       return false;
@@ -57,14 +60,15 @@ export default function AffiliationsPage() {
     return true;
   }
 
-  async function removeItem(section: "main" | "adjunct", id: string) {
+  async function removeItem(section: Section, id: string) {
     if (!confirm("Are you sure you want to delete this affiliation?")) return;
     const nextMain = section === "main" ? main.filter((x) => x.id !== id) : main;
     const nextAdjunct = section === "adjunct" ? adjunct.filter((x) => x.id !== id) : adjunct;
+    const nextPast = section === "past" ? past.filter((x) => x.id !== id) : past;
     setSaving(true);
-    const ok = await persist(nextMain, nextAdjunct);
+    const ok = await persist(nextMain, nextAdjunct, nextPast);
     setSaving(false);
-    if (ok) { setMain(nextMain); setAdjunct(nextAdjunct); }
+    if (ok) { setMain(nextMain); setAdjunct(nextAdjunct); setPast(nextPast); }
   }
 
   async function addItem() {
@@ -75,11 +79,12 @@ export default function AffiliationsPage() {
     const item = { ...form, id: `aff-${Date.now()}` };
     const nextMain = addingTo === "main" ? [...main, item] : main;
     const nextAdjunct = addingTo === "adjunct" ? [...adjunct, item] : adjunct;
+    const nextPast = addingTo === "past" ? [...past, item] : past;
     setSaving(true);
-    const ok = await persist(nextMain, nextAdjunct);
+    const ok = await persist(nextMain, nextAdjunct, nextPast);
     setSaving(false);
     if (ok) {
-      setMain(nextMain); setAdjunct(nextAdjunct);
+      setMain(nextMain); setAdjunct(nextAdjunct); setPast(nextPast);
       setForm(blank());
       setAddingTo(null);
     }
@@ -91,7 +96,7 @@ export default function AffiliationsPage() {
     setForm({ role: item.role, institution: item.institution, location: item.location || "", period: item.period || "", link: item.link || "" });
   }
 
-  async function saveEdit(section: "main" | "adjunct") {
+  async function saveEdit(section: Section) {
     if (!editingId) return;
     if (!form.role.trim() || !form.institution.trim()) {
       alert("Role and institution are required.");
@@ -100,11 +105,12 @@ export default function AffiliationsPage() {
     const apply = (list: AffItem[]) => list.map((x) => (x.id === editingId ? { ...x, ...form } : x));
     const nextMain = section === "main" ? apply(main) : main;
     const nextAdjunct = section === "adjunct" ? apply(adjunct) : adjunct;
+    const nextPast = section === "past" ? apply(past) : past;
     setSaving(true);
-    const ok = await persist(nextMain, nextAdjunct);
+    const ok = await persist(nextMain, nextAdjunct, nextPast);
     setSaving(false);
     if (ok) {
-      setMain(nextMain); setAdjunct(nextAdjunct);
+      setMain(nextMain); setAdjunct(nextAdjunct); setPast(nextPast);
       setEditingId(null);
       setForm(blank());
     }
@@ -137,7 +143,7 @@ export default function AffiliationsPage() {
     );
   }
 
-  function renderAffCard(item: AffItem, section: "main" | "adjunct") {
+  function renderAffCard(item: AffItem, section: Section) {
     if (isAdmin && editingId === item.id) {
       return renderAffForm("Edit affiliation", () => saveEdit(section), () => { setEditingId(null); setForm(blank()); });
     }
@@ -186,7 +192,7 @@ export default function AffiliationsPage() {
     );
   }
 
-  function renderSection(id: "main" | "adjunct", title: string, items: AffItem[]) {
+  function renderSection(id: Section, title: string, items: AffItem[]) {
     return (
       <section className="mb-10">
         <h2 className="section-title">{title}</h2>
@@ -207,8 +213,9 @@ export default function AffiliationsPage() {
   return (
     <div style={{ maxWidth: "820px" }}>
       <h1 style={{ marginBottom: "2rem" }}>Affiliations</h1>
-      {renderSection("main", "Primary Affiliation", main)}
-      {renderSection("adjunct", "Adjunct Affiliations", adjunct)}
+      {renderSection("main", "Primary Affiliations", main)}
+      {renderSection("adjunct", "Adjunct & Visiting Affiliations", adjunct)}
+      {renderSection("past", "Previous Appointments", past)}
     </div>
   );
 }
