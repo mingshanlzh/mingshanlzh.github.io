@@ -182,6 +182,19 @@ export default function ServicesPage() {
         )}
       </section>
 
+      {/* Peer review / refereeing */}
+      <section className="mb-10">
+        <h2 className="section-title">Peer Review</h2>
+        <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>
+          Reviewer / referee for the following journals:
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {(servicesData.refereeing as string[]).map((j) => (
+            <span key={j} className="tag" style={{ background: "var(--accent-bg)", color: "var(--accent)" }}>{j}</span>
+          ))}
+        </div>
+      </section>
+
       {/* Admin note */}
       {isAdmin && (
         <div className="card" style={{ background: "var(--accent-bg)", border: "1px solid var(--border)" }}>
