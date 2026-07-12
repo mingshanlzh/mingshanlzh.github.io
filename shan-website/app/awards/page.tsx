@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Trophy, Coins, ExternalLink, Plus, Trash2, Check, X } from "lucide-react";
 import { useAdmin } from "@/app/lib/AdminContext";
 import { supabase } from "@/app/lib/supabase";
+import awardsData from "@/data/awards.json";
 
 type Award = {
   id: string;
@@ -25,9 +26,20 @@ const blankGrant = (): Omit<Award, "id" | "sort_order"> => ({
   entry_type: "grant", title: "", funder: "", amount: "", period: "", role: "", link: "",
 });
 
+// Baseline content bundled with the site (visible to all visitors even when
+// the database is empty). Supabase rows, when present, take precedence.
+const SEED_ITEMS: Award[] = [
+  ...(awardsData.awards as Omit<Award, "entry_type" | "sort_order">[]).map(
+    (a, i) => ({ ...a, entry_type: "award" as const, sort_order: i })
+  ),
+  ...(awardsData.grants as Omit<Award, "entry_type" | "sort_order">[]).map(
+    (g, i) => ({ ...g, entry_type: "grant" as const, sort_order: i })
+  ),
+];
+
 export default function AwardsPage() {
   const { isAdmin } = useAdmin();
-  const [items, setItems] = useState<Award[]>([]);
+  const [items, setItems] = useState<Award[]>(SEED_ITEMS);
   const [loading, setLoading] = useState(true);
   const [addingAward, setAddingAward] = useState(false);
   const [addingGrant, setAddingGrant] = useState(false);
@@ -40,7 +52,7 @@ export default function AwardsPage() {
 
   useEffect(() => {
     supabase.from("awards").select("*").order("sort_order", { ascending: true })
-      .then(({ data }) => { if (data) setItems(data as Award[]); setLoading(false); });
+      .then(({ data }) => { if (data && data.length > 0) setItems(data as Award[]); setLoading(false); });
   }, []);
 
   async function handleDeleteAward(id: string) {
