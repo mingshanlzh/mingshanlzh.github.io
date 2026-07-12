@@ -1,27 +1,63 @@
 {
   "main": [
     {
-      "id": "aff-main-1",
-      "role": "PhD Student",
-      "institution": "Macquarie University Centre for Health Economy (MUCHE)",
-      "link": "https://www.mq.edu.au/research/research-centres-institutes-and-initiatives/centre-for-health-economy"
+      "id": "aff-main-deakin",
+      "role": "Research Fellow",
+      "institution": "Deakin University",
+      "location": "Melbourne, Australia",
+      "link": "https://www.deakin.edu.au/"
+    },
+    {
+      "id": "aff-main-mq",
+      "role": "PhD Candidate & Senior Research Assistant",
+      "institution": "Macquarie University Centre for the Health Economy (MUCHE)",
+      "location": "Sydney, Australia",
+      "period": "2024 – present",
+      "link": "https://www.mq.edu.au/research/research-centres-groups-and-facilities/prosperous-economies/centres/centre-for-the-health-economy"
     }
   ],
   "adjunct": [
     {
-      "id": "aff-adj-1",
-      "role": "Adjunct Researcher",
+      "id": "aff-adj-shdrc",
+      "role": "Adjunct Research Fellow",
       "institution": "Shanghai Health Development Research Center",
       "location": "Shanghai, China",
-      "link": "https://kygl.shdrc.org/"
+      "period": "April 2025 – present",
+      "link": "https://www.shdrc.org/"
     },
     {
-      "id": "aff-adj-2",
+      "id": "aff-adj-brocher",
       "role": "Visiting Research Fellow",
       "institution": "Brocher Foundation",
       "location": "Geneva, Switzerland",
       "period": "March – April 2026",
       "link": "https://fondation-brocher.ch/"
+    }
+  ],
+  "past": [
+    {
+      "id": "aff-past-shdrc",
+      "role": "Health Economist",
+      "institution": "Shanghai Health Development Research Center",
+      "location": "Shanghai, China",
+      "period": "2021 – 2023",
+      "link": "https://www.shdrc.org/"
+    },
+    {
+      "id": "aff-past-consult",
+      "role": "Independent Health Technology Assessment Consultant & Science Communicator",
+      "institution": "Self-employed",
+      "location": "Shanghai, China",
+      "period": "2016 – 2021",
+      "link": ""
+    },
+    {
+      "id": "aff-past-ubc",
+      "role": "Research & Teaching Assistant",
+      "institution": "University of British Columbia",
+      "location": "Vancouver, Canada",
+      "period": "2012 – 2016",
+      "link": "https://www.ubc.ca/"
     }
   ]
 }
