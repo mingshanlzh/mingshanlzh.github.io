@@ -114,7 +114,7 @@ export default function Sidebar() {
             Shan Jiang
           </div>
           <div className="text-xs" style={{ color: "var(--text-on-dark-muted)" }}>
-            PhD · MUCHE
+            Research Fellow · Deakin
           </div>
         </div>
       </div>
