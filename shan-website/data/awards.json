@@ -1,21 +1,96 @@
 {
   "awards": [
     {
-      "id": "award1",
-      "title": "AHES Student Prize for Best Paper",
-      "organisation": "Australian Health Economics Society",
-      "year": 2023,
-      "link": "https://ahes.net.au"
+      "id": "award-vih-bestpaper",
+      "title": "Best Paper of the Year 2024",
+      "organisation": "Value in Health (journal editorial board) — one worldwide",
+      "year": 2025,
+      "link": "https://www.sciencedirect.com/science/article/pii/S1098301523062009"
+    },
+    {
+      "id": "award-aihi-student",
+      "title": "Student of the Year",
+      "organisation": "Australian Institute of Health Innovation (AIHI), Macquarie University",
+      "year": 2025,
+      "link": ""
+    },
+    {
+      "id": "award-ahes-doctoral",
+      "title": "Best 10 Doctoral Research (selected)",
+      "organisation": "Australian Health Economics Society (AHES) Annual Conference",
+      "year": 2025,
+      "link": ""
+    },
+    {
+      "id": "award-best-paper-2018",
+      "title": "Best Paper Award",
+      "organisation": "Healthcare Management Forum for Young Scholars",
+      "year": 2018,
+      "link": ""
     }
   ],
   "grants": [
     {
-      "id": "grant1",
-      "title": "Macquarie University Research Training Program (RTP) Scholarship",
-      "funder": "Macquarie University / Australian Government",
+      "id": "grant-brocher",
+      "title": "Research Visiting Fellowship (full funding)",
+      "funder": "Brocher Foundation, Geneva, Switzerland",
       "amount": "",
-      "period": "2022–2025",
-      "role": "Chief Investigator (PhD Scholarship)",
+      "period": "March – April 2026",
+      "role": "Visiting Fellow",
+      "link": "https://fondation-brocher.ch/"
+    },
+    {
+      "id": "grant-muaps",
+      "title": "MUAPS PhD Scholarship with top-up",
+      "funder": "Macquarie University",
+      "amount": "AUD $35,000 + $20,000 per year",
+      "period": "2024 – 2026",
+      "role": "PhD Scholarship",
+      "link": ""
+    },
+    {
+      "id": "grant-travel",
+      "title": "Postgraduate Research Travel Grants",
+      "funder": "Macquarie University",
+      "amount": "AUD $12,500 over 3 years",
+      "period": "2024 – 2026",
+      "role": "Recipient",
+      "link": ""
+    },
+    {
+      "id": "grant-pgrf",
+      "title": "Postgraduate Research Fund (PGRF)",
+      "funder": "Macquarie University",
+      "amount": "AUD $6,000",
+      "period": "2025",
+      "role": "Recipient",
+      "link": ""
+    },
+    {
+      "id": "grant-shdrc-copi",
+      "title": "Health Equity for the Chinese Health Insurance System",
+      "funder": "Shanghai Health Development Research Center",
+      "amount": "",
+      "period": "2021 – 2023",
+      "role": "Co-Principal Investigator",
+      "link": ""
+    },
+    {
+      "id": "grant-chdi-copi",
+      "title": "Patient Preferences for Medical Services in Shanghai",
+      "funder": "China Hospital Development Institute, Shanghai Jiao Tong University",
+      "amount": "",
+      "period": "2019 – 2021",
+      "role": "Co-Principal Investigator (external)",
+      "link": ""
+    },
+    {
+      "id": "grant-ubc-fellowship",
+      "title": "Four-Year PhD Fellowship",
+      "funder": "University of British Columbia",
+      "amount": "CAD $25,000 per year",
+      "period": "2012 – 2016",
+      "role": "Doctoral Fellowship",
       "link": ""
     }
   ]
