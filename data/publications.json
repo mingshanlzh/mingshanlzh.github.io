@@ -16,7 +16,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "treatment-preferences-in-adult-patients",
@@ -35,7 +35,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "public-perceptions-of-genetic-sequencing",
@@ -54,7 +54,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 1,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "is-best-worst-scaling-suitable-for-patie",
@@ -73,7 +73,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 1,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "paly-china-2025",
@@ -96,8 +96,8 @@
     "pub_type": "journal",
     "status": "published",
     "sort_order": 0,
-    "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "citedBy": 1,
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "dynamic-distributional-cost-effectivenes",
@@ -116,7 +116,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "op28-evaluating-cost-effectiveness-and-d",
@@ -135,7 +135,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "op18-shall-we-pay-more-for-rare-disease",
@@ -154,7 +154,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "strengthening-inequality-aversion-2025",
@@ -177,8 +177,8 @@
     "pub_type": "journal",
     "status": "published",
     "sort_order": 0,
-    "citedBy": 6,
-    "lastUpdated": "2026-08-03"
+    "citedBy": 7,
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "genomic-sequencing-rare-disease-2025",
@@ -200,8 +200,8 @@
     "pub_type": "journal",
     "status": "published",
     "sort_order": 0,
-    "citedBy": 13,
-    "lastUpdated": "2026-08-03"
+    "citedBy": 14,
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "what-do-chinese-patients-value-in-orthod",
@@ -220,7 +220,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "dynamic-dcea-for-genomic-breast-cancer-s",
@@ -239,7 +239,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "eol-rare-common-china-2025",
@@ -262,8 +262,8 @@
     "pub_type": "journal",
     "status": "published",
     "sort_order": 0,
-    "citedBy": 1,
-    "lastUpdated": "2026-08-03"
+    "citedBy": 2,
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "productivity-adjusted-life-years-(palys)",
@@ -282,7 +282,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "shall-we-pay-more-for-rare-disease-drugs",
@@ -301,7 +301,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "evaluating-cost-effectiveness-and-distri",
@@ -320,7 +320,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "baseline-distribution-of-quality-adjuste",
@@ -339,7 +339,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "income-related-health-inequality-aversio",
@@ -358,7 +358,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "evaluating-cost-effectiveness-and-distri",
@@ -377,7 +377,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "shall-we-pay-more-for-rare-disease-drugs",
@@ -396,7 +396,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "toripalimab-nsclc-2025",
@@ -420,7 +420,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "aggregate-dcea-2025",
@@ -444,7 +444,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 11,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "physicians’-risk-and-time-preferences-an",
@@ -463,7 +463,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "brca-secondary-risk-2025",
@@ -487,7 +487,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "hearing-cea-scoping-2024",
@@ -511,7 +511,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "fh-screening-cea-2024",
@@ -535,7 +535,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 9,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "evaluating-cost-effectiveness-and-distri",
@@ -554,7 +554,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "newborn-deafness-gene-2024",
@@ -578,7 +578,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 2,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "sintilimab-nsclc-2024",
@@ -601,7 +601,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 4,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "authors’-reply:“the-need-for-a-bleed-typ",
@@ -620,7 +620,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "indication-vbp-2024",
@@ -643,7 +643,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 7,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "rapid-genome-nicu-2024",
@@ -667,7 +667,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 3,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "prophylactic-brca-2023",
@@ -691,7 +691,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 18,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "synthesized-economic-evidence-on-the-cos",
@@ -710,7 +710,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "gauging-incentive-values-and-expectation",
@@ -729,7 +729,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 8,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "genome-sequencing-for-newborn-screening—",
@@ -747,8 +747,8 @@
     "pub_type": "journal",
     "status": "published",
     "sort_order": 0,
-    "citedBy": 28,
-    "lastUpdated": "2026-08-03"
+    "citedBy": 29,
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "hemophilia-dce-2023",
@@ -772,7 +772,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 8,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "blood-donor-preferences-2023",
@@ -796,7 +796,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 28,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "sa54-a-scoping-review-of-economic-evalua",
@@ -815,7 +815,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "cost-effectiveness-of-denosumab-for-seco",
@@ -834,7 +834,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 2,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "breast-cancer-screening-china-2023",
@@ -858,7 +858,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 19,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "ltci-preferences-2023",
@@ -882,7 +882,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 14,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "prophylactic-interventions-for-hereditar",
@@ -901,7 +901,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "cancer-targeted-therapy-dce-2022",
@@ -925,7 +925,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 38,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "secondary-findings-guidelines-2022",
@@ -949,7 +949,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 11,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "productivity-loss-guidelines-2022",
@@ -973,7 +973,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 57,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "an-analysis-of-life-year-lost-due-to-cov",
@@ -992,7 +992,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 4,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "qaly-threshold-china-2022",
@@ -1016,7 +1016,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 100,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "covid-adl-older-adults-2022",
@@ -1040,7 +1040,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 35,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "economic-evaluation-of-remdesivir-for-th",
@@ -1059,7 +1059,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 23,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "unrelated-medical-costs-2021",
@@ -1083,7 +1083,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 17,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "离散选择实验用于测量癌症患者靶向治疗偏好的系统回顾",
@@ -1102,7 +1102,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 1,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "obesity-pharmacoeconomics-2021",
@@ -1126,7 +1126,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 13,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "do-rural-residents-in-china-understand-e",
@@ -1144,8 +1144,8 @@
     "pub_type": "journal",
     "status": "published",
     "sort_order": 0,
-    "citedBy": 41,
-    "lastUpdated": "2026-08-03"
+    "citedBy": 42,
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "effectiveness-of-remdesivir-for-the-trea",
@@ -1164,7 +1164,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 60,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "health-care-practitioners’-preferences-f",
@@ -1183,7 +1183,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 24,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "hospital-choice-china-2020",
@@ -1206,8 +1206,8 @@
     "pub_type": "journal",
     "status": "published",
     "sort_order": 0,
-    "citedBy": 56,
-    "lastUpdated": "2026-08-03"
+    "citedBy": 57,
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "cvd-particulate-matter-2020",
@@ -1231,7 +1231,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 9,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "pns41-preferences-of-older-patients-with",
@@ -1250,7 +1250,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 2,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "hee-methodology-china-2020",
@@ -1274,7 +1274,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 14,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "the-cost-effectiveness-of-conducting-thr",
@@ -1293,7 +1293,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 29,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "pharmaceutical-procurement-china-2020",
@@ -1316,7 +1316,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 19,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "pns151-using-instant-messenger-to-recrui",
@@ -1335,7 +1335,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 1,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "pns20-best-worst-scaling-in-health-econo",
@@ -1354,7 +1354,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 3,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "合成控制模型在卫生政策评估中的应用",
@@ -1373,7 +1373,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 1,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "identifying-options-of-best-value:-use-o",
@@ -1392,7 +1392,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 5,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "hospital-pricing-jiangsu-2019",
@@ -1416,7 +1416,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 22,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "hpv-oscc-2017",
@@ -1438,8 +1438,8 @@
     "pub_type": "journal",
     "status": "published",
     "sort_order": 0,
-    "citedBy": 147,
-    "lastUpdated": "2026-08-03"
+    "citedBy": 149,
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "warm-needling-acupuncture-and-medicinal",
@@ -1458,7 +1458,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 15,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "the-role-of-education-in-colorectal-canc",
@@ -1477,7 +1477,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 7,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "chinese-health-system-development-from-1",
@@ -1496,7 +1496,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": 1,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "health-policy-review:-regional-reforms-i",
@@ -1515,7 +1515,7 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   },
   {
     "id": "population-impact-and-cost-effectiveness",
@@ -1534,6 +1534,6 @@
     "status": "published",
     "sort_order": 0,
     "citedBy": null,
-    "lastUpdated": "2026-08-03"
+    "lastUpdated": "2026-08-10"
   }
 ]
